@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Functional.Core
 {
@@ -23,19 +25,16 @@ namespace Functional.Core
             };
     }
 
-    // same, with custom delegate
-
     public record struct Identity<T>(T Value)
     {
         public T Value { get; } = Value;
-
         public static implicit operator T(Identity<T> id) => id.Value;
         public static implicit operator Identity<T>(T value) => new(value);
     };
 
     public static class Identity
     {
-        public static Identity<T> New<T>(T value) => new(value);
+        public static Identity<T> For<T>(T value) => new(value);
         public static Identity<R> Map<T, R>(this Identity<T> @this, Func<T, R> func) => func(@this.Value);
         public static Identity<R> Bind<T, R>(this Identity<T> @this, Func<T, Identity<R>> func) => func(@this.Value);
     }

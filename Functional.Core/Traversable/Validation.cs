@@ -11,23 +11,23 @@ namespace Functional.Core
       public static Exceptional<Validation<R>> Traverse<T, R>
          (this Validation<T> tr, Func<T, Exceptional<R>> f)
          => tr.Match(
-               Invalid: reasons => Exceptional(Invalid<R>(reasons)),
-               Valid: t => f(t).Map(Valid)
+               invalid: reasons => Exceptional(Invalid<R>(reasons)),
+               valid: t => f(t).Map(Valid)
             );
 
       // Task
       public static Task<Validation<R>> Traverse<T, R>
          (this Validation<T> @this, Func<T, Task<R>> func)
          => @this.Match(
-               Invalid: reasons => Async(Invalid<R>(reasons)),
-               Valid: t => func(t).Map(Valid)
+               invalid: reasons => Async(Invalid<R>(reasons)),
+               valid: t => func(t).Map(Valid)
             );
 
       public static Task<Validation<R>> TraverseBind<T, R>(this Validation<T> @this
          , Func<T, Task<Validation<R>>> func)
          => @this.Match(
-               Invalid: reasons => Async(Invalid<R>(reasons)),
-               Valid: t => func(t)
+               invalid: reasons => Async(Invalid<R>(reasons)),
+               valid: t => func(t)
             );
    }
 

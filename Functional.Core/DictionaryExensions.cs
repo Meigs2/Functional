@@ -4,7 +4,7 @@ namespace Functional.Core
 {
    using static F;
 
-   public static class DictionaryExt
+   public static class DictionaryExensions
    {
       public static Option<T> Lookup<K, T>(this IDictionary<K, T> dict, K key, bool ignoreCase = false)
       {

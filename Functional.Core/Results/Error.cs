@@ -1,4 +1,6 @@
-﻿namespace Functional.Core
+﻿using System;
+
+namespace Functional.Core
 {
    public static partial class F
    {
@@ -13,5 +15,6 @@
       internal Error(string Message) { this.Message = Message; }
 
       public static implicit operator Error(string m) => new(m);
+      public static implicit operator Error(Exception e) => new(e.Message);
    }
 }
