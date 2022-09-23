@@ -11,15 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Common\Result" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Remove="Common\README.md" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Common\ErrorException.cs" />
     </ItemGroup>
 
 </Project>

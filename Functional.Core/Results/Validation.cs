@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unit = System.ValueTuple;
 
 namespace Functional.Core
 {
@@ -118,7 +117,7 @@ namespace Functional.Core
 
         public static Validation<Unit> ForEach<R>(this Validation<R> @this, Action<R> act) => Map(@this, act.ToFunc());
 
-        public static Validation<T> Do<T>(this Validation<T> @this, Action<T> action)
+        public static Validation<T> Tap<T>(this Validation<T> @this, Action<T> action)
         {
             @this.ForEach(action);
             return @this;

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Unit = System.ValueTuple;
 
 namespace Functional.Core
 {
@@ -58,12 +57,14 @@ namespace Functional.Core
             None: Empty,
             Some: head => Otherwise(head, list.Skip(1)));
 
-      public static Option<T> Head<T>(this IEnumerable<T> list)
-      {
-         if (list == null) return F.Nothing;
-         var enumerator = list.GetEnumerator();
-         return enumerator.MoveNext() ? Some(enumerator.Current) : F.Nothing;
-      }
+      public static IEnumerable<T> Tail<T>(this IEnumerable<T> list)
+         => list.Skip(1);
+      
+      public static Option<T> Head<T>(this IEnumerable<T> list) =>
+         list.Take(1)
+             .Match(
+                () => Option.None,
+                (x, _) => Some(x));
 
       //public static IEnumerable<R> _Map<T, R>
       //   (this IEnumerable<T> list, Func<T, R> func)
