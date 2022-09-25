@@ -24,8 +24,8 @@ public record Result
     public static Result Failure(IEnumerable<ErrorBase> errors) => new(errors);
     public static Result Failure(string message) => new(new[] { Error.Unexpected(message) });
     public static Result Failure() => new(Enumerable.Empty<ErrorBase>());
-    
-    public static Result<T> Success<T>(T value) => new(value);
+
+    public static Result Success => new();
     public static Result<T> Failure<T>(IEnumerable<ErrorBase> errors) => new(errors);
     
     public static implicit operator Result(ErrorBase errorBase) => Failure(new[] { errorBase });
@@ -42,6 +42,8 @@ public record Result<T> : Result
     
     public static Result<T> Success(T value) => new(value);
     public new static Result<T> Failure(IEnumerable<ErrorBase> errors) => new(errors);
+    
+    public static implicit operator Result<T>(T value) => Success(value);
 }
 
 public static class ResultExtensions
