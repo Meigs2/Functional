@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Functional.Core;
 
@@ -84,5 +85,6 @@ public record Result<T> : ResultBase
 
 public static class ResultExtensions
 {
+    public static Task<Result<T>> AsTask<T>(this Result<T> result) => Task.FromResult(result);
 }
         
