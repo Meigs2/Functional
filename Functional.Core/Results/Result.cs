@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace Functional.Core;
 
+public static partial class F
+{
+    public static Result<T> Success<T>(T value) => value;
+    public static Result<T> Failure<T>(ErrorBase error) => error;
+}
+
 public abstract record ResultBase
 { 
     protected ResultBase()
