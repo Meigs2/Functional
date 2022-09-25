@@ -29,6 +29,7 @@ public record Result
     public static Result<T> Failure<T>(IEnumerable<ErrorBase> errors) => new(errors);
     
     public static implicit operator Result(ErrorBase errorBase) => Failure(new[] { errorBase });
+    public static implicit operator Result(Exception exception) => Failure(new[] { ErrorBase.New(exception) });
 }
 
 public record Result<T> : Result
