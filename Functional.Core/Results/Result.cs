@@ -21,11 +21,13 @@ public record Result
     public Result WithError(ErrorBase errorBase) => this with { Errors = Errors.Append(errorBase) };
     public Result WithErrors(IEnumerable<ErrorBase> errors) => this with { Errors = Errors.Concat(errors) };
     
+    public static Result Failure(Exception error) => new(error);
     public static Result Failure(IEnumerable<ErrorBase> errors) => new(errors);
     public static Result Failure(string message) => new(new[] { Error.Unexpected(message) });
     public static Result Failure() => new(Enumerable.Empty<ErrorBase>());
-
-    public static Result Success => new();
+    
+    public static Result<T> Success<T>(T value) => new(value);
+    public static Result<T> Failure<T>(Exception error) => Result<T>.FromResult(Failure(error));
     public static Result<T> Failure<T>(IEnumerable<ErrorBase> errors) => new(errors);
     
     public static implicit operator Result(ErrorBase errorBase) => Failure(new[] { errorBase });
@@ -45,6 +47,8 @@ public record Result<T> : Result
     public new static Result<T> Failure(IEnumerable<ErrorBase> errors) => new(errors);
     
     public static implicit operator Result<T>(T value) => Success(value);
+
+    public static Result<T> FromResult(Result result) => result.IsSuccess ? Success(default) : Failure(result.Errors);
 }
 
 public static class ResultExtensions
