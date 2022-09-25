@@ -79,6 +79,7 @@ public record Result<T> : ResultBase
     public static implicit operator Result<T>(T value) => Success(value);
     public static implicit operator Result<T>(ErrorBase error) => Failure(error);
     public static implicit operator Result<T>(Exception exception) => Failure(exception);
+    public static implicit operator Result(Result<T> result) => result.IsSuccess ? Result.Success : Result.Failure(result.Errors);
 }
 
 public static class ResultExtensions
