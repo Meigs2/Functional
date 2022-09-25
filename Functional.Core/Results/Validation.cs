@@ -11,17 +11,17 @@ namespace Functional.Core
         public static Validation<T> Valid<T>(T value) => new(value);
 
         // create a Validation in the Invalid state
-        public static Invalid Invalid(params Error[] errors) => new(errors);
-        public static Validation<R> Invalid<R>(params Error[] errors) => new Invalid(errors);
-        public static Invalid Invalid(IEnumerable<Error> errors) => new(errors);
-        public static Validation<R> Invalid<R>(IEnumerable<Error> errors) => new Invalid(errors);
+        public static Invalid Invalid(params ErrorBase[] errors) => new(errors);
+        public static Validation<R> Invalid<R>(params ErrorBase[] errors) => new Invalid(errors);
+        public static Invalid Invalid(IEnumerable<ErrorBase> errors) => new(errors);
+        public static Validation<R> Invalid<R>(IEnumerable<ErrorBase> errors) => new Invalid(errors);
     }
 
     public struct Invalid
     {
-        internal IEnumerable<Error> Errors;
+        internal IEnumerable<ErrorBase> Errors;
 
-        public Invalid(IEnumerable<Error> errors)
+        public Invalid(IEnumerable<ErrorBase> errors)
         {
             Errors = errors;
         }
@@ -29,13 +29,13 @@ namespace Functional.Core
 
     public record struct Validation<T>
     {
-        internal IEnumerable<Error> Errors { get; }
+        internal IEnumerable<ErrorBase> Errors { get; }
         internal T Value { get; }
         public bool IsValid { get; }
-        public static Validation<T> Fail(IEnumerable<Error> errors) => new(errors);
-        public static Validation<T> Fail(params Error[] errors) => new(errors.AsEnumerable());
+        public static Validation<T> Fail(IEnumerable<ErrorBase> errors) => new(errors);
+        public static Validation<T> Fail(params ErrorBase[] errors) => new(errors.AsEnumerable());
 
-        private Validation(IEnumerable<Error> errors)
+        private Validation(IEnumerable<ErrorBase> errors)
         {
             IsValid = false;
             Errors = errors;
@@ -46,10 +46,10 @@ namespace Functional.Core
         {
             IsValid = true;
             Value = right;
-            Errors = Enumerable.Empty<Error>();
+            Errors = Enumerable.Empty<ErrorBase>();
         }
 
-        public static implicit operator Validation<T>(Error error) => new(new[] { error });
+        public static implicit operator Validation<T>(ErrorBase errorBase) => new(new[] { errorBase });
         public static implicit operator Validation<T>(Invalid left) => new(left.Errors);
         public static implicit operator Validation<T>(T right) => Valid(right);
 
@@ -72,10 +72,10 @@ namespace Functional.Core
         public static Validation<R> Apply<T, R>(this Validation<Func<T, R>> f, Validation<T> x) => f.Match(
             invalid: Invalid<R>, valid: func => x.Match(invalid: Invalid<R>, valid: value => Valid(func(value))));
 
-        public static R Match<T, R>(this Validation<T> opt, Func<IEnumerable<Error>, R> invalid, Func<T, R> valid) =>
+        public static R Match<T, R>(this Validation<T> opt, Func<IEnumerable<ErrorBase>, R> invalid, Func<T, R> valid) =>
             opt.IsValid ? valid(opt.Value) : invalid(opt.Errors);
 
-        public static Unit Match<T>(this Validation<T> opt, Action<IEnumerable<Error>> invalid, Action<T> valid) =>
+        public static Unit Match<T>(this Validation<T> opt, Action<IEnumerable<ErrorBase>> invalid, Action<T> valid) =>
             opt.Match(invalid.ToFunc(), valid.ToFunc());
 
         public static Validation<Func<T2, R>> Apply<T1, T2, R>(this Validation<Func<T1, T2, R>> @this,

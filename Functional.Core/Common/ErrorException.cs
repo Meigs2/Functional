@@ -16,8 +16,8 @@ namespace Functional.Core;
 /// <remarks>
 /// Unlike exceptions, `Error` can be either:
 /// 
+/// * `Error`               - representing a some 
 /// * `Exceptional`         - representing an unexpected error
-/// * `LabelledExceptional` - representing an unexpected error with additional context (a message)
 /// * `Expected`            - representing an expected error
 /// * `ManyErrors`          - representing an many errors
 ///
@@ -45,7 +45,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// Convert to an `Error`
     /// </summary>
     [Pure]
-    public abstract Error ToError();
+    public abstract ErrorBase ToError();
 
     /// <summary>
     /// This type can contain zero or more errors.  If `IsEmpty` is `true` then this is like `None` in `Option`:  still
@@ -72,7 +72,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// </summary>
     /// <remarks>Single errors will be converted to `ManyErrors`;  `ManyErrors` will have their collection updated</remarks>
     [Pure]
-    public abstract ErrorException Append(ErrorException error);
+    public abstract ErrorException Append(ErrorException errorException);
     
     /// <summary>
     /// Append an error to this error
@@ -104,7 +104,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// </summary>
     /// <param name="message">Error message</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorException New(Exception thisException) =>
+    public static ErrorException Exceptional(Exception thisException) =>
         new ExceptionalException(thisException);
 
     /// <summary>
@@ -113,7 +113,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// <param name="message">Error message</param>
     /// <param name="thisException">The exception this error represents</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorException New(string message, Exception thisException) =>
+    public static ErrorException Exceptional(string message, Exception thisException) =>
         new ExceptionalException(message, thisException);
 
     /// <summary>
@@ -121,7 +121,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// </summary>
     /// <param name="message">Error message</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorException New(string message) =>
+    public static ErrorException Expected(string message) =>
         new ExpectedException(message, 0, Option.None);
 
     /// <summary>
@@ -130,7 +130,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// <param name="code">Error code</param>
     /// <param name="message">Error message</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorException New(int code, string message) =>
+    public static ErrorException Expected(int code, string message) =>
         new ExpectedException(message, code, Option.None);
     
     /// <summary>
@@ -140,7 +140,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// <param name="message">Error message</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorException New(int code, string message, ErrorException inner) =>
+    public static ErrorException Expected(int code, string message, ErrorException inner) =>
         new ExpectedException(message, code, inner);
 
     /// <summary>
@@ -149,7 +149,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// <param name="code">Error code</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorException New(string message, ErrorException inner) =>
+    public static ErrorException Expected(string message, ErrorException inner) =>
         new ExpectedException(message, 0, inner);
 
     /// <summary>
@@ -201,8 +201,8 @@ public sealed class ExpectedException : ErrorException
     /// Generates a new `Error` that contains the `Code`, `Message`, and `Inner` of this `ErrorException`.
     /// </summary>
     [Pure]
-    public override Error ToError() => 
-        new Expected(Message, Code, Inner.Map(static e => e.ToError()));
+    public override ErrorBase ToError() => 
+        new ExpectedError(Message, Code, Inner.Map(static e => e.ToError()));
 
     /// <summary>
     /// True if the error is exceptional
@@ -223,10 +223,10 @@ public sealed class ExpectedException : ErrorException
     /// </summary>
     /// <remarks>Single errors will be converted to `ManyErrors`;  `ManyErrors` will have their collection updated</remarks>
     [Pure]
-    public override ErrorException Append(ErrorException error) =>
-        error is ManyExceptions m
-            ? new ManyExceptions(error.Cons(m.Errors))
-            : new ManyExceptions(new [] {this, error});
+    public override ErrorException Append(ErrorException errorException) =>
+        errorException is ManyExceptions m
+            ? new ManyExceptions(errorException.Cons(m.Errors))
+            : new ManyExceptions(new [] {this, errorException});
 }
 
 /// <summary>
@@ -265,13 +265,13 @@ public class ExceptionalException : ErrorException
     public override Option<ErrorException> Inner => 
         Exception?.InnerException == null
             ? Option.None
-            : New(Exception.InnerException);
+            : Exceptional(Exception.InnerException);
 
     /// <summary>
     /// Gets the `Error`
     /// </summary>
     /// <returns></returns>
-    public override Error ToError() =>
+    public override ErrorBase ToError() =>
         Exception == null
             ? new Exceptional(Message, Code)
             : new Exceptional(Exception);
@@ -294,13 +294,13 @@ public class ExceptionalException : ErrorException
     /// Append an error to this error
     /// </summary>
     /// <remarks>Single errors will be converted to `ManyErrors`;  `ManyErrors` will have their collection updated</remarks>
-    /// <param name="error">Error</param>
+    /// <param name="errorException">Error</param>
     /// <returns></returns>
     [Pure]
-    public override ErrorException Append(ErrorException error) =>
-        error is ManyExceptions m
-            ? new ManyExceptions(error.Cons(m.Errors))
-            : new ManyExceptions(new [] {this, error});
+    public override ErrorException Append(ErrorException errorException) =>
+        errorException is ManyExceptions m
+            ? new ManyExceptions(errorException.Cons(m.Errors))
+            : new ManyExceptions(new [] {this, errorException});
 }
 
 /// <summary>
@@ -330,7 +330,7 @@ public sealed class ManyExceptions : ErrorException
     /// <summary>
     /// Gets the Exception
     /// </summary>
-    public override Error ToError() => 
+    public override ErrorBase ToError() => 
         new ManyErrors(Errors.Map(static e => e.ToError()));
 
     /// <summary>
@@ -359,20 +359,18 @@ public sealed class ManyExceptions : ErrorException
     /// Append an error to this error
     /// </summary>
     /// <remarks>Single errors will be converted to `ManyErrors`;  `ManyErrors` will have their collection updated</remarks>
-    /// <param name="error">Error</param>
+    /// <param name="errorException">Error</param>
     /// <returns></returns>
     [Pure]
-    public override ErrorException Append(ErrorException error) =>
-        error is ManyExceptions m
+    public override ErrorException Append(ErrorException errorException) =>
+        errorException is ManyExceptions m
             ? new ManyExceptions(Errors.Concat(m.Errors))
-            : new ManyExceptions(new [] {this, error});
+            : new ManyExceptions(new [] {this, errorException});
 
     [Pure]
     public override IEnumerator<ErrorException> GetEnumerator() =>
         Errors.GetEnumerator();
-
 }
-
 
 /// <summary>
 /// Value is bottom
@@ -400,8 +398,8 @@ public class BottomException : ExceptionalException
     public override Option<ErrorException> Inner =>
         default;
     
-    public override Error ToError() => 
-        BottomError.Default;
+    public override ErrorBase ToError() => 
+        Bottom.Default;
     
-    public override ErrorException Append(ErrorException error) => throw new NotImplementedException();
+    public override ErrorException Append(ErrorException errorException) => throw new NotImplementedException();
 }
