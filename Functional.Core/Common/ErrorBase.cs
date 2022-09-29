@@ -176,40 +176,40 @@ public abstract record ErrorBase
         new Exceptional(message, thisException);
 
     /// <summary>
-    /// Create an `Expected` error 
+    /// Create an `Unexpected` error 
     /// </summary>
     /// <param name="message">Error message</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ErrorBase New(string message) =>
-        new ExpectedError(message, 0, Option.None);
+        new UnexpectedError(message, 0, Option.None);
 
     /// <summary>
-    /// Create an `Expected` error 
+    /// Create an `Unexpected` error 
     /// </summary>
     /// <param name="code">Error code</param>
     /// <param name="message">Error message</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ErrorBase New(int code, string message) =>
-        new ExpectedError(message, code, Option.None);
+        new UnexpectedError(message, code, Option.None);
     
     /// <summary>
-    /// Create an `Expected` error 
+    /// Create an `Unexpected` error 
     /// </summary>
     /// <param name="code">Error code</param>
     /// <param name="message">Error message</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ErrorBase New(int code, string message, ErrorBase inner) =>
-        new ExpectedError(message, code, inner);
+        new UnexpectedError(message, code, inner);
 
     /// <summary>
-    /// Create an `Expected` error 
+    /// Create an `Unexpected` error 
     /// </summary>
     /// <param name="message">Error message</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ErrorBase New(string message, ErrorBase inner) =>
-        new ExpectedError(message, 0, inner);
+        new UnexpectedError(message, 0, inner);
 
     /// <summary>
     /// Create a `ManyErrors` error 
