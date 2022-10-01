@@ -47,8 +47,8 @@ public record Result : ResultBase
     {
     }
     
-    public Result WithError(ErrorBase errorBase) => this with { Errors = Errors.Append(errorBase) };
-    public Result WithErrors(IEnumerable<ErrorBase> errors) => this with { Errors = Errors.Concat(errors) };
+    public Result WithError(ErrorBase errorBase) => this with { Errors = Errors.Prepend(errorBase) };
+    public Result WithErrors(IEnumerable<ErrorBase> errors) => this with { Errors = errors.Concat(Errors) };
     
     public static Result Failure(Exception error) => new(error);
     
