@@ -67,6 +67,6 @@ public class AsyncOperation<T>
 
 public static class AsyncOperationExtensions
 {
-    public static AsyncOperation<T> FromTask<T>(Task<T> task) { return AsyncOperation<T>.FromTask(task); }
-    public static AsyncOperation<T> FromTask<T>(Task task) { return AsyncOperation<T>.FromTask(task); }
+    public static AsyncOperation<T> FromTask<T>(this Task<T> task) { return AsyncOperation<T>.FromTask(task); }
+    public static AsyncOperation<T> FromTask<T>(this Task task) { return AsyncOperation<T>.FromTask(task); }
 }
