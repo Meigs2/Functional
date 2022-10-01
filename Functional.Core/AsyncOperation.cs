@@ -96,8 +96,9 @@ public class AsyncOperation<T>
 
     public T GetResult() { return _task.Result; }
     public Task<T> GetTask() { return _task; }
-    
+
     public static implicit operator AsyncOperation<T>(Task<T> task) { return new AsyncOperation<T>(task); }
+    public static implicit operator AsyncOperation<T>(AsyncOperation<Task<T>> task) { return new AsyncOperation<T>(task); }
     public static implicit operator Task<T>(AsyncOperation<T> operation) { return operation._task; }
 }
 
@@ -105,4 +106,5 @@ public static class AsyncOperationExtensions
 {
     public static AsyncOperation<T> FromTask<T>(this Task<T> task) { return AsyncOperation<T>.FromTask(task); }
     public static AsyncOperation<T> FromTask<T>(this Task task) { return AsyncOperation<T>.FromTask(task); }
+    public static AsyncOperation<T> Unwrap<T>(this AsyncOperation<Task<T>> task) { return AsyncOperation<T>.FromTask(task.Unwrap()); }
 }
