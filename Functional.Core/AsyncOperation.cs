@@ -21,6 +21,11 @@ public class AsyncOperation<T>
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)._task).Unwrap());
     }
+    
+    public AsyncOperation<TResult> Tap<TResult>(Func<T, AsyncOperation<TResult>> selector)
+    {
+        return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)._taskWithoutResult).Unwrap());
+    }
 
     public AsyncOperation<T> Catch(Func<Exception, T> handler)
     {
