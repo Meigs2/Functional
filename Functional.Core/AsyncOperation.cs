@@ -21,6 +21,14 @@ public class AsyncOperation<T>
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)._task).Unwrap());
     }
+    
+    
+    // Define a match function based on the result of the previous operation that 
+    // allows us to branch the execution based a predicate of the result
+    public AsyncOperation<TResult> Match<TResult>(Func<T, bool> predicate, Func<T, AsyncOperation<TResult>> success, Func<T, AsyncOperation<TResult>> failure)
+    {
+        return new AsyncOperation<TResult>(_task.ContinueWith(t => predicate(t.Result) ? success(t.Result)._task : failure(t.Result)._task).Unwrap());
+    }
 
     public AsyncOperation<TResult> Tap<TResult>(Func<T, AsyncOperation<TResult>> selector)
     {
