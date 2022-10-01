@@ -76,7 +76,7 @@ int value = GetNone().ValueOrThrow(); // None -> throws InvalidOperationExceptio
 
 #### Why use `Result` instead of returning `null`? Why not Try...(.., ref T result)? Throw an exception?
 
-In traditional programming, we have a few options for handling errors:
+In traditional C# programming, we have a few options for handling errors:
 
 * Return `null` or `default(T)` and hope that the caller checks for it
 * Return a `bool` or `enum` to indicate success or failure, and return the result via an `out` or `ref` parameter (Try...(.., ref T result) pattern)
