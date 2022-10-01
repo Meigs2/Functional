@@ -21,7 +21,7 @@ public class AsyncOperation<T>
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)._task).Unwrap());
     }
-    
+
     public AsyncOperation<TResult> Tap<TResult>(Func<T, AsyncOperation<TResult>> selector)
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)._taskWithoutResult).Unwrap());
@@ -46,6 +46,16 @@ public class AsyncOperation<T>
                                                return t;
                                            })
                                           .Unwrap());
+    }
+    
+    public AsyncOperation<T> FailFastIf(Func<T, bool> condition, Func<T, Exception> exceptionFactory)
+    {
+        return new AsyncOperation<T>(_task.ContinueWith(t =>
+        {
+            if (condition(t.Result)) { throw exceptionFactory(t.Result); }
+
+            return t.Result;
+        }));
     }
 
     public AsyncOperation<T> Finally(Action action)
