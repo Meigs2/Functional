@@ -45,7 +45,7 @@ public abstract class ErrorException : Exception, IEnumerable<ErrorException>
     /// Convert to an `Error`
     /// </summary>
     [Pure]
-    public abstract ErrorBase ToError();
+    public abstract BaseError ToError();
 
     /// <summary>
     /// This type can contain zero or more errors.  If `IsEmpty` is `true` then this is like `None` in `Option`:  still
@@ -201,7 +201,7 @@ public sealed class ExpectedException : ErrorException
     /// Generates a new `Error` that contains the `Code`, `Message`, and `Inner` of this `ErrorException`.
     /// </summary>
     [Pure]
-    public override ErrorBase ToError() => 
+    public override BaseError ToError() => 
         new ExpectedError(Message, Code, Inner.Map(static e => e.ToError()));
 
     /// <summary>
@@ -271,7 +271,7 @@ public class ExceptionalException : ErrorException
     /// Gets the `Error`
     /// </summary>
     /// <returns></returns>
-    public override ErrorBase ToError() =>
+    public override BaseError ToError() =>
         Exception == null
             ? new Exceptional(Message, Code)
             : new Exceptional(Exception);
@@ -330,7 +330,7 @@ public sealed class ManyExceptions : ErrorException
     /// <summary>
     /// Gets the Exception
     /// </summary>
-    public override ErrorBase ToError() => 
+    public override BaseError ToError() => 
         new ManyErrors(Errors.Map(static e => e.ToError()));
 
     /// <summary>
@@ -398,7 +398,7 @@ public class BottomException : ExceptionalException
     public override Option<ErrorException> Inner =>
         default;
     
-    public override ErrorBase ToError() => 
+    public override BaseError ToError() => 
         Bottom.Default;
     
     public override ErrorException Append(ErrorException errorException) => throw new NotImplementedException();

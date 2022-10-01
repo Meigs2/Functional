@@ -13,11 +13,11 @@ namespace Functional.Core;
 /// and 'append' coming from the `Append` method or use of `operator+` 
 /// </summary>
 /// <param name="Errors">Errors</param>
-public sealed record ManyErrors(IEnumerable<ErrorBase> Errors) : ErrorBase
+public sealed record ManyErrors(IEnumerable<BaseError> Errors) : BaseError
 {
 
     /// <summary>Errors</summary>
-    public IEnumerable<ErrorBase> Errors { get; init; } = Errors;
+    public IEnumerable<BaseError> Errors { get; init; } = Errors;
 
     public override int Code => 
         Functional.Core.Errors.ManyErrorsCode;
@@ -51,8 +51,8 @@ public sealed record ManyErrors(IEnumerable<ErrorBase> Errors) : ErrorBase
     /// Return true this error contains or *is* the `error` provided
     /// </summary>
     [Pure]
-    public override bool Is(ErrorBase errorBase) =>
-        Errors.Any(e => e.Is(errorBase));
+    public override bool Is(BaseError baseError) =>
+        Errors.Any(e => e.Is(baseError));
 
     /// <summary>
     /// True if any of the the errors are exceptional
@@ -72,7 +72,7 @@ public sealed record ManyErrors(IEnumerable<ErrorBase> Errors) : ErrorBase
     /// Get the first error (this may be `Errors.None` if there are zero errors)
     /// </summary>
     [Pure]
-    public override ErrorBase Head() =>
+    public override BaseError Head() =>
         Errors.Any()
             ? Functional.Core.Errors.None
             : Errors.Head().Value;
@@ -81,7 +81,7 @@ public sealed record ManyErrors(IEnumerable<ErrorBase> Errors) : ErrorBase
     /// Get the errors with the head removed (this may be `Errors.None` if there are zero errors in the tail)
     /// </summary>
     [Pure]
-    public override ErrorBase Tail() =>
+    public override BaseError Tail() =>
         Errors.Skip(1).Any()
             ? Functional.Core.Errors.None
             : this with {Errors = Errors.Skip(1)};
@@ -105,6 +105,6 @@ public sealed record ManyErrors(IEnumerable<ErrorBase> Errors) : ErrorBase
         Errors.Count();
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override IEnumerable<ErrorBase> AsEnumerable() =>
+    public override IEnumerable<BaseError> AsEnumerable() =>
         Errors.AsEnumerable();
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Functional.Core.Enumeration;
 using static Functional.Core.F;
 
 namespace Functional.Core;
@@ -12,27 +13,29 @@ namespace Functional.Core;
 /// <summary>
 /// Abstract error value
 /// </summary>
-public abstract record ErrorBase
+public abstract record BaseError : ResultReason
 {
+    protected override int ReasonType => 0; // 0 = Error
+
     /// <summary>
     /// Error code
     /// </summary>
     [Pure]
-    public virtual int Code =>
+    public override int Code =>
         0;
 
     /// <summary>
     /// Error message
     /// </summary>
     [Pure]
-    public abstract string Message { get; }
+    public override string Message { get; }
 
     /// <summary>
     /// Inner error
     /// </summary>
     [Pure]
-    public virtual Option<ErrorBase> Inner =>
-        Option<ErrorBase>.None;
+    public virtual Option<BaseError> Inner =>
+        Option<BaseError>.None;
 
     /// <summary>
     /// If this error represents an exceptional error, then this will return true if the exceptional error is of type E
@@ -44,12 +47,12 @@ public abstract record ErrorBase
     /// Return true if this error contains or *is* the `error` provided
     /// </summary>
     [Pure]
-    public virtual bool Is(ErrorBase errorBase) =>
-        errorBase is ManyErrors errors
+    public virtual bool Is(BaseError baseError) =>
+        baseError is ManyErrors errors
             ? errors.Errors.Any(Is) 
                 : Code == 0
-                    ? Message == errorBase.Message
-                    : Code == errorBase.Code;
+                    ? Message == baseError.Message
+                    : Code == baseError.Code;
 
     /// <summary>
     /// True if the error is exceptional
@@ -67,14 +70,14 @@ public abstract record ErrorBase
     /// Get the first error (this will be `Errors.None` if there are zero errors)
     /// </summary>
     [Pure]
-    public virtual ErrorBase Head() =>
+    public virtual BaseError Head() =>
         this;
 
     /// <summary>
     /// Get the errors with the head removed (this may be `Errors.None` if there are zero errors in the tail)
     /// </summary>
     [Pure]
-    public virtual ErrorBase Tail() =>
+    public virtual BaseError Tail() =>
         Errors.None;
 
     /// <summary>
@@ -124,11 +127,11 @@ public abstract record ErrorBase
     /// Append an error to this error
     /// </summary>
     /// <remarks>Single errors will be converted to `ManyErrors`;  `ManyErrors` will have their collection updated</remarks>
-    /// <param name="errorBase">Error</param>
+    /// <param name="baseError">Error</param>
     /// <returns></returns>
     [Pure]
-    public ErrorBase Append(ErrorBase errorBase) =>
-        (this, error: errorBase) switch
+    public BaseError Append(BaseError baseError) =>
+        (this, error: baseError) switch
         {
             (ManyErrors e1, ManyErrors e2) => new ManyErrors(e1.Errors.Concat(e2.Errors)), 
             (ManyErrors e1, var e2)        => new ManyErrors(e1.Errors.Append(e2)), 
@@ -141,11 +144,11 @@ public abstract record ErrorBase
     /// </summary>
     /// <remarks>Single errors will be converted to `ManyErrors`;  `ManyErrors` will have their collection updated</remarks>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase operator+(ErrorBase lhs, ErrorBase rhs) =>
+    public static BaseError operator+(BaseError lhs, BaseError rhs) =>
         lhs.Append(rhs);
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual IEnumerable<ErrorBase> AsEnumerable()
+    public virtual IEnumerable<BaseError> AsEnumerable()
     {
         yield return this;
     }
@@ -162,7 +165,7 @@ public abstract record ErrorBase
     /// </summary>
     /// <param name="thisException">Exception</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase New(Exception thisException) =>
+    public static BaseError New(Exception thisException) =>
         new Exceptional(thisException);
 
     /// <summary>
@@ -172,7 +175,7 @@ public abstract record ErrorBase
     /// <param name="message">Error message</param>
     /// <param name="thisException">Exception</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase New(string message, Exception thisException) =>
+    public static BaseError New(string message, Exception thisException) =>
         new Exceptional(message, thisException);
 
     /// <summary>
@@ -180,7 +183,7 @@ public abstract record ErrorBase
     /// </summary>
     /// <param name="message">Error message</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase New(string message) =>
+    public static BaseError New(string message) =>
         new UnexpectedError(message, 0, Option.None);
 
     /// <summary>
@@ -189,7 +192,7 @@ public abstract record ErrorBase
     /// <param name="code">Error code</param>
     /// <param name="message">Error message</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase New(int code, string message) =>
+    public static BaseError New(int code, string message) =>
         new UnexpectedError(message, code, Option.None);
     
     /// <summary>
@@ -199,7 +202,7 @@ public abstract record ErrorBase
     /// <param name="message">Error message</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase New(int code, string message, ErrorBase inner) =>
+    public static BaseError New(int code, string message, BaseError inner) =>
         new UnexpectedError(message, code, inner);
 
     /// <summary>
@@ -208,7 +211,7 @@ public abstract record ErrorBase
     /// <param name="message">Error message</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase New(string message, ErrorBase inner) =>
+    public static BaseError New(string message, BaseError inner) =>
         new UnexpectedError(message, 0, inner);
 
     /// <summary>
@@ -218,7 +221,7 @@ public abstract record ErrorBase
     /// <param name="code">Error code</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase Many(params ErrorBase[] errors) =>
+    public static BaseError Many(params BaseError[] errors) =>
         errors.Length == 0
             ? Errors.None
             : errors.Length == 1
@@ -231,7 +234,7 @@ public abstract record ErrorBase
     /// <param name="code">Error code</param>
     /// <param name="inner">The inner error to this error</param>
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ErrorBase Many(IEnumerable<ErrorBase> errors) =>
+    public static BaseError Many(IEnumerable<BaseError> errors) =>
         errors.Any()
             ? Errors.None
             : errors.Count() == 1
@@ -239,19 +242,19 @@ public abstract record ErrorBase
                 : new ManyErrors(errors);
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator ErrorBase(string e) =>
+    public static implicit operator BaseError(string e) =>
         New(e);
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator ErrorBase((int Code, string Message) e) =>
+    public static implicit operator BaseError((int Code, string Message) e) =>
         New(e.Code, e.Message);
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator ErrorBase(Exception e) =>
+    public static implicit operator BaseError(Exception e) =>
         New(e);
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Exception(ErrorBase e) =>
+    public static implicit operator Exception(BaseError e) =>
         e.ToException();
     
     /// <summary>
@@ -260,14 +263,14 @@ public abstract record ErrorBase
     /// If it fails, Errors.Bottom is returned
     /// </summary>
     [Pure]
-    public static ErrorBase FromObject(object value) =>
+    public static BaseError FromObject(object value) =>
         value switch
         {
-            ErrorBase err          => err,
+            BaseError err          => err,
             ErrorException ex  => ex.ToError(),
             Exception ex       => New(ex),
             string str         => New(str),
-            Option<ErrorBase> oerr => oerr.GetOrElse(Errors.Bottom),
+            Option<BaseError> oerr => oerr.GetOrElse(Errors.Bottom),
             _                  => Errors.Bottom
         };
     
@@ -277,12 +280,12 @@ public abstract record ErrorBase
         // Messy, but we're doing our best to recover an error rather than return Bottom
             
         FAIL fail                                           => fail,
-        Exception e  when typeof(FAIL) == typeof(ErrorBase)     => (FAIL)(object)New(e),
+        Exception e  when typeof(FAIL) == typeof(BaseError)     => (FAIL)(object)New(e),
         Exception e  when typeof(FAIL) == typeof(string)    => (FAIL)(object)e.Message,
-        ErrorBase e      when typeof(FAIL) == typeof(Exception) => (FAIL)(object)e.ToException(),
-        ErrorBase e      when typeof(FAIL) == typeof(string)    => (FAIL)(object)e.ToString(),
+        BaseError e      when typeof(FAIL) == typeof(Exception) => (FAIL)(object)e.ToException(),
+        BaseError e      when typeof(FAIL) == typeof(string)    => (FAIL)(object)e.ToString(),
         string e     when typeof(FAIL) == typeof(Exception) => (FAIL)(object)new Exception(e),
-        string e     when typeof(FAIL) == typeof(ErrorBase)     => (FAIL)(object)New(e),
+        string e     when typeof(FAIL) == typeof(BaseError)     => (FAIL)(object)New(e),
         _ => Option.None
     };
 
@@ -291,4 +294,45 @@ public abstract record ErrorBase
     /// </summary>
     public Unit Throw() =>
         throw ToException();
+}
+
+// We actually want to be able to model results as a list of messages, which can contain not only errors, but also warnings, info, etc.
+// Define a base class which ErrorBase can inherit from which allows us to additionally create other base classes for info and warnings.
+public abstract record ResultReason
+{
+    protected abstract int ReasonType { get; }
+    
+    public abstract string Message { get; }
+
+    /// <summary>
+    /// Error code
+    /// </summary>
+    public abstract int Code { get; }
+
+    public virtual bool Equals(ResultReason? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return ReasonType == other.ReasonType && Message == other.Message && Code == other.Code;
+    }
+}
+
+public abstract record Warning : ResultReason
+{
+    public override string Message { get; }
+    public override int Code { get; }
+
+    protected Warning()
+    {
+    }
+}
+
+public abstract record Info : ResultReason
+{
+    public override string Message { get; }
+    public override int Code { get; }
+
+    protected Info()
+    {
+    }
 }

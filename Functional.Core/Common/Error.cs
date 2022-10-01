@@ -2,11 +2,9 @@ using System;
 
 namespace Functional.Core;
 
-public static class Error
+public record Error : UnexpectedError
 {
-    public static UnexpectedError Unexpected(string message)
+    public Error(string message) : base(message)
     {
-        return new UnexpectedError(message);
     }
-    
 }

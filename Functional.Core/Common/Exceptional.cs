@@ -15,7 +15,7 @@ namespace Functional.Core;
 /// gracefully handle that, but all stack-trace information (and the like) will be erased.  It is still considered
 /// an exceptional error however.
 /// </remarks>
-public record Exceptional : ErrorBase
+public record Exceptional : BaseError
 {
     /// <summary>
     /// Internal exception.  If this record is constructed via deserialisation, or the default constructor then this
@@ -65,7 +65,7 @@ public record Exceptional : ErrorBase
     /// Returns the inner exception as an `Error` (if one exists), `None` otherwise
     /// </summary>
     [Pure]
-    public override Option<ErrorBase> Inner => 
+    public override Option<BaseError> Inner => 
         Value?.InnerException == null
             ? Option.None
             : New(Value.InnerException);
@@ -96,12 +96,12 @@ public record Exceptional : ErrorBase
         Value is E;
 
     [Pure]
-    public override bool Is(ErrorBase errorBase) =>
-        errorBase is ManyErrors errors
+    public override bool Is(BaseError baseError) =>
+        baseError is ManyErrors errors
             ? errors.Errors.Any(Is) 
             : Value == null
-                ? errorBase.IsExceptional && Code == errorBase.Code && Message == errorBase.Message 
-                : errorBase.IsExceptional && Value.GetType().IsInstanceOfType(errorBase.ToException());
+                ? baseError.IsExceptional && Code == baseError.Code && Message == baseError.Message 
+                : baseError.IsExceptional && Value.GetType().IsInstanceOfType(baseError.ToException());
 
     /// <summary>
     /// True if the error is exceptional

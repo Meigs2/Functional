@@ -9,26 +9,26 @@ namespace Functional.Core;
 public static partial class F
 {
     public static Result<T> Success<T>(T value) => value;
-    public static Result<T> Failure<T>(ErrorBase error) => error;
+    public static Result<T> Failure<T>(BaseError baseError) => baseError;
 }
 
 public abstract record ResultBase
 {
     protected ResultBase() { }
-    protected ResultBase(ErrorBase error) { Errors = new[] { error }; }
-    protected ResultBase(IEnumerable<ErrorBase> errors) { Errors = errors; }
+    protected ResultBase(BaseError baseError) { Errors = new[] { baseError }; }
+    protected ResultBase(IEnumerable<BaseError> errors) { Errors = errors; }
     public bool IsSuccess => !IsFailure;
     public bool IsFailure => Errors.Any(x => !x.IsExpected);
-    public IEnumerable<ErrorBase> Errors { get; internal set; } = Enumerable.Empty<ErrorBase>();
+    public IEnumerable<BaseError> Errors { get; internal set; } = Enumerable.Empty<BaseError>();
 }
 
 public record Result : ResultBase
 {
     internal Result() { }
-    private Result(ErrorBase error) : base(error) { }
-    private Result(IEnumerable<ErrorBase> errors) : base(errors) { }
+    private Result(BaseError baseError) : base(baseError) { }
+    private Result(IEnumerable<BaseError> errors) : base(errors) { }
 
-    public Result Match(Action onSuccess, Action<IEnumerable<ErrorBase>> onFailure)
+    public Result Match(Action onSuccess, Action<IEnumerable<BaseError>> onFailure)
     {
         if (IsSuccess) { onSuccess(); }
         else { onFailure(Errors); }
@@ -36,44 +36,44 @@ public record Result : ResultBase
         return this;
     }
     
-    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) =>
+    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<BaseError>, T> onFailure) =>
         IsSuccess ? onSuccess() : onFailure(Errors);
 
-    public Result WithError(ErrorBase errorBase) => this with { Errors = Errors.Prepend(errorBase) };
-    public Result WithErrors(IEnumerable<ErrorBase> errors) => this with { Errors = errors.Concat(Errors) };
+    public Result WithError(BaseError baseError) => this with { Errors = Errors.Prepend(baseError) };
+    public Result WithErrors(IEnumerable<BaseError> errors) => this with { Errors = errors.Concat(Errors) };
     public static Result Success => new();
-    public static Result Failure(ErrorBase error) => new(error);
-    public static Result Failure(IEnumerable<ErrorBase> errors) => new(errors);
-    public static implicit operator Result(ErrorBase error) => Failure(error);
+    public static Result Failure(BaseError baseError) => new(baseError);
+    public static Result Failure(IEnumerable<BaseError> errors) => new(errors);
+    public static implicit operator Result(BaseError baseError) => Failure(baseError);
     public static implicit operator Result(Exception exception) => Failure(exception);
     public static Result operator +(Result a, Result b) => a with { Errors = a.Errors.Concat(b.Errors) };
-    public static Result operator +(Result a, ErrorBase b) => a with { Errors = a.Errors.Prepend(b) };
-    public static Result operator +(Result a, IEnumerable<ErrorBase> b) => a with { Errors = a.Errors.Concat(b) };
+    public static Result operator +(Result a, BaseError b) => a with { Errors = a.Errors.Prepend(b) };
+    public static Result operator +(Result a, IEnumerable<BaseError> b) => a with { Errors = a.Errors.Concat(b) };
 }
 
 public record Result<T> : ResultBase
 {
     public T Value { get; init; }
     internal Result(T value) { Value = value; }
-    internal Result(ErrorBase error) : base(error) { }
-    internal Result(IEnumerable<ErrorBase> errors) : base(errors) { }
+    internal Result(BaseError baseError) : base(baseError) { }
+    internal Result(IEnumerable<BaseError> errors) : base(errors) { }
 
-    public Result<T> Match<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) => 
+    public Result<T> Match<T>(Func<T> onSuccess, Func<IEnumerable<BaseError>, T> onFailure) => 
         IsSuccess ? onSuccess() : onFailure(Errors);
 
-    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) =>
+    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<BaseError>, T> onFailure) =>
         IsSuccess ? onSuccess() : onFailure(Errors);
     
-    public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) => 
+    public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<BaseError>, T> onFailure) => 
         IsSuccess ? onSuccess() : onFailure(Errors);
 
-    public Result<T> WithError(ErrorBase errorBase) => this with { Errors = Errors.Append(errorBase) };
-    public Result<T> WithErrors(IEnumerable<ErrorBase> errors) => this with { Errors = Errors.Concat(errors) };
+    public Result<T> WithError(BaseError baseError) => this with { Errors = Errors.Append(baseError) };
+    public Result<T> WithErrors(IEnumerable<BaseError> errors) => this with { Errors = Errors.Concat(errors) };
     public static Result<T> Success(T value) => new(value);
-    public static Result<T> Failure(ErrorBase error) => new(error);
-    public static Result<T> Failure(IEnumerable<ErrorBase> errors) => new(errors);
+    public static Result<T> Failure(BaseError baseError) => new(baseError);
+    public static Result<T> Failure(IEnumerable<BaseError> errors) => new(errors);
     public static implicit operator Result<T>(T value) => Success(value);
-    public static implicit operator Result<T>(ErrorBase error) => Failure(error);
+    public static implicit operator Result<T>(BaseError baseError) => Failure(baseError);
     public static implicit operator Result<T>(Exception exception) => Failure(exception);
 
     public static implicit operator Result(Result<T> result) =>

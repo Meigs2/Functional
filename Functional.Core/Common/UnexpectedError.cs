@@ -3,9 +3,9 @@ using System.Diagnostics.Contracts;
 
 namespace Functional.Core;
 
-public record UnexpectedError : ErrorBase
+public record UnexpectedError : BaseError
 {
-    public UnexpectedError(string Message, int Code = 0, Option<ErrorBase> Inner = default)
+    public UnexpectedError(string Message, int Code = 0, Option<BaseError> Inner = default)
     {
         this.Message = Message;
         this.Code = Code;
@@ -28,7 +28,7 @@ public record UnexpectedError : ErrorBase
     /// Inner error
     /// </summary>
     [Pure]
-    public override Option<ErrorBase> Inner { get; }
+    public override Option<BaseError> Inner { get; }
     
     public override string ToString() => 
         Message;

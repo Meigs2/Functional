@@ -19,7 +19,7 @@ namespace Functional.Core;
 /// 
 /// > This allows for localised error messages where the message is ignored when matching/catching
 /// </summary>
-public record ExpectedError : ErrorBase
+public record ExpectedError : BaseError
 {
     /// <summary>
     /// Contains the following:
@@ -40,7 +40,7 @@ public record ExpectedError : ErrorBase
     /// <param name="Message">Error message</param>
     /// <param name="Code">Error code</param>
     /// <param name="Inner">Optional inner error</param>
-    public ExpectedError(string Message, int Code = 0, Option<ErrorBase> Inner = default)
+    public ExpectedError(string Message, int Code = 0, Option<BaseError> Inner = default)
     {
         this.Message = Message;
         this.Code = Code;
@@ -63,7 +63,7 @@ public record ExpectedError : ErrorBase
     /// Inner error
     /// </summary>
     [Pure]
-    public override Option<ErrorBase> Inner { get; }
+    public override Option<BaseError> Inner { get; }
     
     public override string ToString() => 
         Message;
@@ -96,7 +96,7 @@ public record ExpectedError : ErrorBase
     public override bool IsExpected =>
         true;
 
-    public void Deconstruct(out string Message, out int Code, out Option<ErrorBase> Inner)
+    public void Deconstruct(out string Message, out int Code, out Option<BaseError> Inner)
     {
         Message = this.Message;
         Code = this.Code;

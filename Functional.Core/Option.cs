@@ -149,7 +149,7 @@ namespace Functional.Core
         public static Option<T> OrElse<T>(this Option<T> left, Func<Option<T>> right) =>
             left.Match(() => right(), _ => left);
 
-        public static Validation<T> ToValidation<T>(this Option<T> opt, Func<ErrorBase> error) =>
+        public static Validation<T> ToValidation<T>(this Option<T> opt, Func<BaseError> error) =>
             opt.Match(() => Invalid(error()), t => Valid(t));
 
         // LINQ
