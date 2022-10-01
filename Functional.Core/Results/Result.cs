@@ -35,6 +35,9 @@ public record Result : ResultBase
 
         return this;
     }
+    
+    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) =>
+        IsSuccess ? onSuccess() : onFailure(Errors);
 
     public Result WithError(ErrorBase errorBase) => this with { Errors = Errors.Prepend(errorBase) };
     public Result WithErrors(IEnumerable<ErrorBase> errors) => this with { Errors = errors.Concat(Errors) };
@@ -55,17 +58,14 @@ public record Result<T> : ResultBase
     internal Result(ErrorBase error) : base(error) { }
     internal Result(IEnumerable<ErrorBase> errors) : base(errors) { }
 
-    public Result<T> Match<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure)
-    {
-        if (IsSuccess) { return onSuccess(); }
-        else { return onFailure(Errors); }
-    }
+    public Result<T> Match<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) => 
+        IsSuccess ? onSuccess() : onFailure(Errors);
 
-    public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure)
-    {
-        if (IsSuccess) { return onSuccess(); }
-        else { return onFailure(Errors); }
-    }
+    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) =>
+        IsSuccess ? onSuccess() : onFailure(Errors);
+    
+    public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<ErrorBase>, T> onFailure) => 
+        IsSuccess ? onSuccess() : onFailure(Errors);
 
     public Result<T> WithError(ErrorBase errorBase) => this with { Errors = Errors.Append(errorBase) };
     public Result<T> WithErrors(IEnumerable<ErrorBase> errors) => this with { Errors = Errors.Concat(errors) };
