@@ -40,7 +40,7 @@ public record ExpectedError : ErrorBase
     /// <param name="Message">Error message</param>
     /// <param name="Code">Error code</param>
     /// <param name="Inner">Optional inner error</param>
-    public ExpectedError(string Message, int Code, Option<ErrorBase> Inner = default)
+    public ExpectedError(string Message, int Code = 0, Option<ErrorBase> Inner = default)
     {
         this.Message = Message;
         this.Code = Code;
