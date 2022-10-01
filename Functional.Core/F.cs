@@ -55,7 +55,7 @@ namespace Functional.Core
 
       public static IEnumerable<T> List<T>(params T[] items) => items.ToImmutableList();
 
-      public static Func<T, IEnumerable<T>> SingletonList<T>() => (item) => ImmutableList.Create(item);
+      public static Func<T, IEnumerable<T>> SingletonList<T>() => item => ImmutableList.Create(item);
 
       public static IEnumerable<T> Cons<T>(this T t, IEnumerable<T> ts)
          => List(t).Concat(ts);

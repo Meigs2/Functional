@@ -64,10 +64,10 @@ namespace Functional.Core
     public static class Validation
     {
         public static T IsValidOr<T>(this Validation<T> opt, T defaultValue) =>
-            opt.Match((errs) => defaultValue, (t) => t);
+            opt.Match(errs => defaultValue, t => t);
 
         public static T ValidOr<T>(this Validation<T> opt, Func<T> fallback) =>
-            opt.Match((errs) => fallback(), (t) => t);
+            opt.Match(errs => fallback(), t => t);
 
         public static Validation<R> Apply<T, R>(this Validation<Func<T, R>> f, Validation<T> x) => f.Match(
             invalid: Invalid<R>, valid: func => x.Match(invalid: Invalid<R>, valid: value => Valid(func(value))));
@@ -124,15 +124,15 @@ namespace Functional.Core
         }
 
         public static Validation<R> Bind<T, R>(this Validation<T> val, Func<T, Validation<R>> f) =>
-            val.Match(invalid: (err) => Invalid(err), valid: (r) => f(r));
+            val.Match(invalid: err => Invalid(err), valid: r => f(r));
 
         // LINQ
         public static Validation<R> Select<T, R>(this Validation<T> @this, Func<T, R> map) => @this.Map(map);
 
         public static Validation<RR>
             SelectMany<T, R, RR>(this Validation<T> @this, Func<T, Validation<R>> bind, Func<T, R, RR> project) =>
-            @this.Match(invalid: (err) => Invalid(err),
-                        valid: (t) =>
-                            bind(t).Match(invalid: (err) => Invalid(err), valid: (r) => Valid(project(t, r))));
+            @this.Match(invalid: err => Invalid(err),
+                        valid: t =>
+                            bind(t).Match(invalid: err => Invalid(err), valid: r => Valid(project(t, r))));
     }
 }

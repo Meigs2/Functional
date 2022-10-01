@@ -105,10 +105,10 @@ namespace Functional.Core
         public static Either<L, RR> Apply<L, R, RR>
            (this Either<L, Func<R, RR>> @this, Either<L, R> arg)
            => @this.Match(
-              Left: (errF) => Left(errF),
-              Right: (f) => arg.Match<Either<L, RR>>(
-                 Left: (err) => Left(err),
-                 Right: (t) => Right(f(t))));
+              Left: errF => Left(errF),
+              Right: f => arg.Match<Either<L, RR>>(
+                 Left: err => Left(err),
+                 Right: t => Right(f(t))));
         
       public static Either<L, Func<T2, R>> Apply<L, T1, T2, R>
          (this Either<L, Func<T1, T2, R>> @this, Either<L, T1> arg)

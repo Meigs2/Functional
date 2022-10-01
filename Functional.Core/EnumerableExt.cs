@@ -104,7 +104,7 @@ namespace Functional.Core
          => from t in source
             let opt = bind(t)
             where opt.IsSome()
-            select project(t, opt.ValueUnsafe());
+            select project(t, opt.ValueOrThrow());
 
       static IEnumerable<T> TakeWhile<T>(this IEnumerable<T> @this, Func<T, bool> pred)
       {
