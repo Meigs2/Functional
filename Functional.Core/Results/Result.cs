@@ -112,11 +112,15 @@ public record Result<T> : ResultBase
 
     public Result<T> WithReasons(IEnumerable<Reason> errors) =>
         this with { Reasons = Reasons.Concat(errors) };
-
-    public Result<T> WithWarning(Warning warning) => this with { Reasons = Reasons.Append(warning) };
-
-    public Result<T> WithWarnings(IEnumerable<Warning> warnings) =>
-        this with { Reasons = Reasons.Concat(warnings) };
+    
+    public Result<T> WithError(Error error) => WithReason(error);
+    public Result<T> WithErrors(IEnumerable<Error> errors) => WithReasons(errors);
+    
+    public Result<T> WithWarning(Warning warning) => WithReason(warning);
+    public Result<T> WithWarnings(IEnumerable<Warning> warnings) => WithReasons(warnings);
+    
+    public Result<T> WithInfo(Info info) => WithReason(info);
+    public Result<T> WithInfo(IEnumerable<Info> info) => WithReasons(info);
 
     public static Result<T> Success(T value) => new(value);
     
