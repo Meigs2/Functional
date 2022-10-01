@@ -8,7 +8,7 @@ namespace Functional.Core
         /// <summary>
         /// An error state without any error values
         /// </summary>
-        public static readonly BaseError None = new ManyErrors(Enumerable.Empty<BaseError>());
+        public static readonly Error None = new ManyErrors(Enumerable.Empty<Error>());
 
         /// <summary>
         /// Bottom error text
@@ -27,7 +27,7 @@ namespace Functional.Core
         /// An error that indicates a value from an operation couldn't be evaluated.  This is a hard
         /// fail for systems that depend on expressions to produce results. 
         /// </summary>
-        public static readonly BaseError Bottom = Core.Bottom.Default;
+        public static readonly Error Bottom = Core.Bottom.Default;
 
         /// <summary>
         /// Cancelled error text
@@ -42,7 +42,7 @@ namespace Functional.Core
         /// <summary>
         /// Cancelled error
         /// </summary>
-        public static readonly BaseError Cancelled = (CancelledCode, CancelledText);
+        public static readonly Error Cancelled = (CancelledCode, CancelledText);
  
         /// <summary>
         /// Timed-out error text
@@ -57,7 +57,7 @@ namespace Functional.Core
         /// <summary>
         /// Timed-out error
         /// </summary>
-        public static readonly BaseError TimedOut = (TimedOutCode, TimedOutText);    
+        public static readonly Error TimedOut = (TimedOutCode, TimedOutText);    
 
         /// <summary>
         /// Sequence-empty error text
@@ -72,7 +72,7 @@ namespace Functional.Core
         /// <summary>
         /// Sequence-empty error
         /// </summary>
-        public static readonly BaseError SequenceEmpty = (SequenceEmptyCode, SequenceEmptyText);    
+        public static readonly Error SequenceEmpty = (SequenceEmptyCode, SequenceEmptyText);    
 
         /// <summary>
         /// Closed error text
@@ -87,7 +87,7 @@ namespace Functional.Core
         /// <summary>
         /// Closed error
         /// </summary>
-        public static readonly BaseError Closed = (ClosedCode, ClosedText);    
+        public static readonly Error Closed = (ClosedCode, ClosedText);    
 
         /// <summary>
         /// Parse error code
@@ -97,7 +97,7 @@ namespace Functional.Core
         /// <summary>
         /// Parse error
         /// </summary>
-        public static BaseError ParseError(string msg) => (ParseErrorCode, msg);
+        public static Error ParseError(string msg) => (ParseErrorCode, msg);
 
         /// <summary>
         /// Many errors code

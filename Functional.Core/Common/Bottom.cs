@@ -10,7 +10,7 @@ namespace Functional.Core;
 /// </summary>
 public sealed record Bottom() : Exceptional(BottomException.Default)
 {
-    public static readonly BaseError Default = new Bottom();
+    public static readonly Error Default = new Bottom();
     
     public override int Code => 
         Errors.BottomCode; 
@@ -46,7 +46,7 @@ public sealed record Bottom() : Exceptional(BottomException.Default)
     /// Return true this error contains or *is* the `error` provided
     /// </summary>
     [Pure]
-    public override bool Is(BaseError baseError) =>
+    public override bool Is(Error baseError) =>
         baseError is ManyErrors errors
             ? errors.Errors.Any(Is) 
             : baseError is Bottom;
