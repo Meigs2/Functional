@@ -114,7 +114,7 @@ public record Exceptional : Error
     /// True if the error is expected
     /// </summary>
     [Pure]
-    public override bool IsExpected =>
+    internal override bool IsExpected =>
         false;
 
     public void Deconstruct(out string Message, out int Code)

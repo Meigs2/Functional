@@ -65,7 +65,7 @@ public sealed record ManyErrors(IEnumerable<Error> Errors) : Error
     /// True if all of the the errors are expected
     /// </summary>
     [Pure]
-    public override bool IsExpected =>
+    internal override bool IsExpected =>
         Errors.All(static e => e.IsExpected);
 
     /// <summary>

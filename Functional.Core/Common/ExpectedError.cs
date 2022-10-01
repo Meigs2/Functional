@@ -93,8 +93,7 @@ public record ExpectedError : Error
     /// True if the error is expected
     /// </summary>
     [Pure]
-    public override bool IsExpected =>
-        true;
+    internal override bool IsExpected => true;
 
     public void Deconstruct(out string Message, out int Code, out Option<Error> Inner)
     {

@@ -62,6 +62,6 @@ public sealed record Bottom() : Exceptional(BottomException.Default)
     /// True if the error is expected
     /// </summary>
     [Pure]
-    public override bool IsExpected =>
+    internal override bool IsExpected =>
         false;
 }
