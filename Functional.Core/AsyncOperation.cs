@@ -57,7 +57,17 @@ public class AsyncOperation<T>
             return t.Result;
         }));
     }
+    
+    public AsyncOperation<T> FailFastIf(Func<T, bool> condition, Exception exception)
+    {
+        return new AsyncOperation<T>(_task.ContinueWith(t =>
+        {
+            if (condition(t.Result)) { throw exception; }
 
+            return t.Result;
+        }));
+    }
+    
     public AsyncOperation<T> Finally(Action action)
     {
         return new AsyncOperation<T>(_task.ContinueWith(t =>
