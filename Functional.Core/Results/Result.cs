@@ -31,7 +31,6 @@ public abstract record ResultBase
     public bool IsSuccess => !IsFailure;
     public bool IsFailure => Errors.Any(x => !x.IsExpected);
     public IEnumerable<ErrorBase> Errors { get; internal set; } = Enumerable.Empty<ErrorBase>();
-    public static ResultBase operator +(ResultBase a, ResultBase b) => a with { Errors = a.Errors.Concat(b.Errors) };
 }
 
 public record Result : ResultBase
@@ -59,6 +58,8 @@ public record Result : ResultBase
     
     public static implicit operator Result(ErrorBase error) => Failure(error);
     public static implicit operator Result(Exception exception) => Failure(exception);
+    
+    public static Result operator +(Result a, Result b) => a with { Errors = a.Errors.Concat(b.Errors) };
 }
 public record Result<T> : ResultBase
 {
