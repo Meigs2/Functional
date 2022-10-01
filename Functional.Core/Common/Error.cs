@@ -130,9 +130,6 @@ public abstract record Error : Reason
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Error(Exception e) => New(e);
 
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Exception(Error e) => e.ToException();
-
     /// <summary>
     /// Attempt to recover an error from an object.
     /// Will accept Error, ErrorException, Exception, string, Option<Error>
