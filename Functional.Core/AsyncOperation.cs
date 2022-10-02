@@ -74,12 +74,6 @@ public class AsyncOperation<T>
         }));
     }
     
-    public AsyncOperation<IEnumerable<T>> ThenMany(Func<T, IEnumerable<AsyncOperation<T>>> selector)
-    {
-        return new AsyncOperation<IEnumerable<T>>(_task.ContinueWith(t => selector(t.Result).Select(x => x._task).ToArray()).Unwrap().ContinueWith(t => t.Result.Select(x => x.Result)));
-    }
-    
-    
     public AsyncOperation<T> Catch(Func<Exception, T> handler)
     {
         return new AsyncOperation<T>(_task.ContinueWith(t =>
