@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Functional.Core;
@@ -16,25 +18,68 @@ public class AsyncOperation<T>
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)));
     }
+    
+    public AsyncOperation<TResult> MapAsync<TResult>(Func<T, Task<TResult>> selector)
+    {
+        return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result).Result));
+    }
 
     public AsyncOperation<TResult> Bind<TResult>(Func<T, AsyncOperation<TResult>> selector)
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)._task).Unwrap());
     }
     
+    public AsyncOperation<TResult> BindAsync<TResult>(Func<T, Task<AsyncOperation<TResult>>> selector)
+    {
+        return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result).Result._task).Unwrap());
+    }
     
-    // Define a match function based on the result of the previous operation that 
-    // allows us to branch the execution based a predicate of the result
     public AsyncOperation<TResult> Match<TResult>(Func<T, bool> predicate, Func<T, TResult> success, Func<T, TResult> failure)
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t => predicate(t.Result) ? success(t.Result) : failure(t.Result)));
     }
-
-    public AsyncOperation<TResult> Tap<TResult>(Func<T, AsyncOperation<TResult>> selector)
+    
+    public AsyncOperation<TResult> MatchAsync<TResult>(Func<T, bool> predicate, Func<T, Task<TResult>> success, Func<T, Task<TResult>> failure)
     {
-        return new AsyncOperation<TResult>(_task.ContinueWith(t => selector(t.Result)._taskWithoutResult).Unwrap());
+        return new AsyncOperation<TResult>(_task.ContinueWith(t => predicate(t.Result) ? success(t.Result).Result : failure(t.Result).Result));
     }
 
+    public AsyncOperation<T> Tap(Action<T> action)
+    {
+        return new AsyncOperation<T>(_task.ContinueWith(t => { action(t.Result); return t.Result; }));
+    }
+    
+    public AsyncOperation<T> TapAsync(Func<T, Task> action)
+    {
+        return new AsyncOperation<T>(_task.ContinueWith(t => { action(t.Result).Wait(); return t.Result; }));
+    }
+    
+    public AsyncOperation<TResult> TapParallel<TResult>(Func<T, IEnumerable<AsyncOperation<TResult>>> selector)
+    {
+        return new AsyncOperation<TResult>(_task.ContinueWith(t =>
+        {
+            var tasks = selector(t.Result).Select(x => x._task);
+            Task.WaitAll(tasks.ToArray());
+            return t.Result;
+        }));
+    }
+    
+    public AsyncOperation<TResult> TapParallelAsync<TResult>(Func<T, Task<IEnumerable<AsyncOperation<TResult>>>> selector)
+    {
+        return new AsyncOperation<TResult>(_task.ContinueWith(t =>
+        {
+            var tasks = selector(t.Result).Result.Select(x => x._task);
+            Task.WaitAll(tasks.ToArray());
+            return t.Result;
+        }));
+    }
+    
+    public AsyncOperation<IEnumerable<T>> ThenMany(Func<T, IEnumerable<AsyncOperation<T>>> selector)
+    {
+        return new AsyncOperation<IEnumerable<T>>(_task.ContinueWith(t => selector(t.Result).Select(x => x._task).ToArray()).Unwrap().ContinueWith(t => t.Result.Select(x => x.Result)));
+    }
+    
+    
     public AsyncOperation<T> Catch(Func<Exception, T> handler)
     {
         return new AsyncOperation<T>(_task.ContinueWith(t =>
