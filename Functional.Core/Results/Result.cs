@@ -43,9 +43,9 @@ public abstract record ResultBase
 
 public record Result : ResultBase
 {
-    private Result() { }
-    private Result(Reason reason) : base(reason) { }
-    private Result(IEnumerable<Reason> errors) : base(errors) { }
+    protected Result() { }
+    protected Result(Reason reason) : base(reason) { }
+    protected Result(IEnumerable<Reason> errors) : base(errors) { }
 
     public Result Match(Action onSuccess, Action<IEnumerable<Reason>> onFailure)
     {
@@ -96,9 +96,9 @@ public record Result : ResultBase
 public record Result<T> : ResultBase
 {
     public T Value { get; init; }
-    internal Result(T value) { Value = value; }
-    internal Result(Reason reason) : base(reason) { }
-    internal Result(IEnumerable<Reason> errors) : base(errors) { }
+    protected internal Result(T value) { Value = value; }
+    protected internal Result(Reason reason) : base(reason) { }
+    protected internal Result(IEnumerable<Reason> errors) : base(errors) { }
 
     public Result<T> Match<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
         IsSuccess ? onSuccess() : onFailure(Reasons);
