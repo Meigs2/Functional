@@ -151,6 +151,7 @@ public record Result<T> : ResultBase
 public static class ResultExtensions
 {
     public static Task<Result<T>> AsTask<T>(this Result<T> result) => Task.FromResult(result);
+    public static Result<T> ToResult<T>(this T result) => result;
 
     public static Result Tap(this Result @this, Action<Result> action)
     {
