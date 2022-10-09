@@ -48,7 +48,7 @@ namespace Functional.Core
 
         public static Option<T> None => Option.None;
 
-        private static Option<T> Some(T value) => Option.Some(value);
+        public static Option<T> Some(T value) => Option.Some(value);
 
         private Option(Some<T?> some)
         {
