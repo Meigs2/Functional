@@ -100,8 +100,8 @@ public record Result<T> : ResultBase
     protected internal Result(Reason reason) : base(reason) { }
     protected internal Result(IEnumerable<Reason> errors) : base(errors) { }
 
-    public Result<T> Match<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
-        IsSuccess ? onSuccess() : onFailure(Reasons);
+    public Result<T> Match(Func<T, T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
+        IsSuccess ? onSuccess(Value) : onFailure(Reasons);
 
     public T Map<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
         IsSuccess ? onSuccess() : onFailure(Reasons);
