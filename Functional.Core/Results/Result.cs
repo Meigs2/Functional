@@ -27,7 +27,7 @@ public abstract record ResultBase
     }
 
     private bool? _isSuccess;
-    public bool IsSuccess => _isSuccess ??= Errors.Any(reason => !reason.IsExpected);
+    public bool IsSuccess => _isSuccess ??= Errors.All(reason => reason.IsExpected);
     public bool IsFailure => !IsSuccess;
     public IEnumerable<Reason> Reasons { get; internal init; } = Enumerable.Empty<Reason>();
     
