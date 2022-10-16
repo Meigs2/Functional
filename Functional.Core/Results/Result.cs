@@ -134,6 +134,7 @@ public record Result<T> : ResultBase
     public static implicit operator Result<T>(Reason error) => Failure(error);
     public static implicit operator Result<T>(Error error) => Failure(error);
     public static implicit operator Result<T>(Exception exception) => Error.New(exception);
+    public static implicit operator Option<T>(Result<T> @this) => @this.ToOption();
 
     public static implicit operator Result(Result<T> result) =>
         result.IsSuccess ? Result.Success : Result.Failure(result.Reasons);
