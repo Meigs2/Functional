@@ -95,18 +95,18 @@ public record Result : ResultBase
 
 public record Result<T> : ResultBase
 {
-    public T Value { get; init; }
-    protected internal Result(T value) { Value = value; }
+    public T? Value { get; init; }
+    protected internal Result(T? value) { Value = value; }
     protected internal Result(Reason reason) : base(reason) { }
     protected internal Result(IEnumerable<Reason> errors) : base(errors) { }
 
-    public Result<TR> Match<TR>(Func<T, TR> onSuccess, Func<IEnumerable<Reason>, TR> onFailure) =>
+    public Result<TR> Match<TR>(Func<T?, TR> onSuccess, Func<IEnumerable<Reason>, TR> onFailure) =>
         IsSuccess ? onSuccess(Value) : onFailure(Reasons);
 
-    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
+    public T Map(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
         IsSuccess ? onSuccess() : onFailure(Reasons);
 
-    public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
+    public Result<T> Bind(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
         IsSuccess ? onSuccess() : onFailure(Reasons);
 
     public Result<T> WithReason(Reason reason) => this with { Reasons = Reasons.Append(reason) };
@@ -123,7 +123,7 @@ public record Result<T> : ResultBase
     public Result<T> WithInfo(Info info) => WithReason(info);
     public Result<T> WithInfo(IEnumerable<Info> info) => WithReasons(info);
 
-    public static Result<T> Success(T value) => new(value);
+    public static Result<T> Success(T? value) => new(value);
     
     public static Result<T> Failure(Reason reason) => new(reason);
     public static Result<T> Failure(IEnumerable<Reason> errors) => new(errors);
@@ -134,7 +134,7 @@ public record Result<T> : ResultBase
     public static implicit operator Result<T>(Reason error) => Failure(error);
     public static implicit operator Result<T>(Error error) => Failure(error);
     public static implicit operator Result<T>(Exception exception) => Error.New(exception);
-    public static implicit operator Option<T>(Result<T> @this) => @this.ToOption();
+    public static implicit operator Option<T>(Result<T?>? @this) => @this?.ToOption() ?? Option.None;
 
     public static implicit operator Result(Result<T> result) =>
         result.IsSuccess ? Result.Success : Result.Failure(result.Reasons);
@@ -166,7 +166,7 @@ public static class ResultExtensions
         return @this;
     }
 
-    public static Option<T> ToOption<T>(this Result<T> @this) => @this.IsSuccess ? @this.Value : Option<T>.None;
+    public static Option<T> ToOption<T>(this Result<T?> @this) => @this.IsSuccess ? @this.Value ?? Option<T>.None : Option<T>.None;
 
     public static Result<T> ToResult<T>(this Option<T> @this) =>
         @this.Match(() => Result<T>.Failure("Option is none"), Result<T>.Success);
