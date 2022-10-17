@@ -63,6 +63,7 @@ public record Result : ResultBase
     public static Result Failure(Reason reason) => new(reason);
     public static Result Failure(string message) => Error.New(message);
     public static Result Failure(IEnumerable<Reason> errors) => new(errors);
+    public static Result Failure() => Failure("The result failed without a specified reason.");
     
     public static Result<T> Failure<T>(Reason reason) => new(reason);
     public static Result<T> Failure<T>(string reason) => Result<T>.Failure(reason);
