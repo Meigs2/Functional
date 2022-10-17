@@ -89,6 +89,7 @@ public record Result : ResultBase
     public static implicit operator Result(Reason reason) => Failure(reason);
     public static implicit operator Result(Error error) => Failure(error);
     public static implicit operator Result(Exception exception) => Error.New(exception);
+    public static implicit operator Task<Result>(Result result) => Task.FromResult(result);
     
     public static Result operator +(Result a, Result b) =>
         a with { Reasons = a.Reasons.Concat(b.Reasons) };
@@ -148,6 +149,8 @@ public record Result<T> : ResultBase
     public static implicit operator Result<T>(Error error) => Failure(error);
     public static implicit operator Result<T>(Exception exception) => Error.New(exception);
     public static implicit operator Option<T>(Result<T?>? @this) => @this?.ToOption() ?? Option.None;
+    public static implicit operator Result<T>(Result result) => result.IsSuccess ? Success(default).WithReasons(result.Reasons) : Failure(result.Reasons);
+    public static implicit operator Task<Result<T>>(Result<T> result) => Task.FromResult(result);
 
     public static implicit operator Result(Result<T> result) =>
         result.IsSuccess ? Result.Success : Result.Failure(result.Reasons);
