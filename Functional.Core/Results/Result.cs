@@ -69,9 +69,12 @@ public record Result : ResultBase
     public static Result<T> Failure<T>(string reason) => Result<T>.Failure(reason);
     public static Result<T> Failure<T>(IEnumerable<Reason> errors) => new(errors);
 
-    private Result WithReason(Reason reason) => this with { Reasons = Reasons.Prepend(reason) };
-    private Result WithReasons(IEnumerable<Reason> errors) => this with { Reasons = errors.Concat(Reasons) };
+    public Result WithReason(Reason reason) => this with { Reasons = Reasons.Prepend(reason) };
+    public Result WithReasons(IEnumerable<Reason> errors) => this with { Reasons = errors.Concat(Reasons) };
     
+    public static Result FromReason(Reason reason) => new Result().WithReason(reason);
+    public static Result FromReasons(IEnumerable<Reason> errors) => new Result().WithReasons(errors); 
+       
     public Result WithError(Error error) => WithReason(error);
     public Result WithErrors(IEnumerable<Error> errors) => WithReasons(errors);
     
@@ -130,6 +133,10 @@ public record Result<T> : ResultBase
     public static Result<T> Failure(IEnumerable<Reason> errors) => new(errors);
     public static Result<T> Failure(string message) => Error.New(message);
     public static Result<T> Failure(Exception reason) => Error.New(reason);
+    
+    
+    public static Result<T> FromReason(Reason reason) => new(reason);
+    public static Result<T> FromReason(IEnumerable<Reason> errors) => new(errors);
     
     public static implicit operator Result<T>(T value) => Success(value);
     public static implicit operator Result<T>(Reason error) => Failure(error);
