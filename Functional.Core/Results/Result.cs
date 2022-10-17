@@ -12,41 +12,34 @@ public static partial class F
     public static Result<T> Failure<T>(Error error) => error;
 }
 
-public abstract record ResultBase
+public record struct Result
 {
-    protected ResultBase() { }
-
-    protected ResultBase(Reason reason)
-    {
-        Reasons = new[] { reason };
-    }
-
-    protected ResultBase(IEnumerable<Reason> errors)
-    {
-        Reasons = errors;
-    }
-
-    private bool? _isSuccess;
+    private bool? _isSuccess = null;
     public bool IsSuccess => _isSuccess ??= Errors.Any(reason => !reason.IsExpected);
     public bool IsFailure => !IsSuccess;
     public IEnumerable<Reason> Reasons { get; internal init; } = Enumerable.Empty<Reason>();
     
-    private List<Error>? _errors;
+    private List<Error>? _errors = null;
     public IEnumerable<Error> Errors => _errors ??= Reasons.Where(x => x.Type == ReasonType.Error).Cast<Error>().ToList();
     
-    private List<Warning>? _warnings;
+    private List<Warning>? _warnings = null;
     public IEnumerable<Warning> Warnings => _warnings ??= Reasons.Where(x => x.Type == ReasonType.Warning).Cast<Warning>().ToList();
     
-    private List<Info>? _info;
+    private List<Info>? _info = null;
     public IEnumerable<Info> Infos => _info ??= Reasons.Where(x => x.Type == ReasonType.Info).Cast<Info>().ToList();
-}
+    
+    public Result() { }
 
-public record Result : ResultBase
-{
-    protected Result() { }
-    protected Result(Reason reason) : base(reason) { }
-    protected Result(IEnumerable<Reason> errors) : base(errors) { }
+    public Result(Reason reason)
+    {
+        Reasons = new[] { reason };
+    }
 
+    public Result(IEnumerable<Reason> errors)
+    {
+        Reasons = errors;
+    }
+    
     public Result Match(Action onSuccess, Action<IEnumerable<Reason>> onFailure)
     {
         if (IsSuccess) { onSuccess(); }
@@ -93,26 +86,56 @@ public record Result : ResultBase
         a with { Reasons = a.Reasons.Concat(b) };
 }
 
-public record Result<T> : ResultBase
+public record struct Result<T>
 {
-    public T Value { get; init; }
-    protected internal Result(T value) { Value = value; }
-    protected internal Result(Reason reason) : base(reason) { }
-    protected internal Result(IEnumerable<Reason> errors) : base(errors) { }
+    public bool IsSuccess => _result.IsSuccess;
+    public bool IsFailure => !IsSuccess;
+    public IEnumerable<Reason> Reasons
+    {
+        get => _result.Reasons;
+        internal init => _result = _result with{ Reasons = value };
+    }
+
+    public IEnumerable<Error> Errors => _result.Errors;
+
+    public IEnumerable<Warning> Warnings => _result.Warnings;
+
+    public IEnumerable<Info> Infos => _result.Infos;
+    
+    public T? Value { get; }
+    private Result _result;
+
+    public Result(T value)
+    {
+        Value = value;
+        _result = new Result();
+    }
+
+    public Result(Reason reason)
+    {
+        _result = new Result(reason);
+        Value = default;
+    }
+
+    public Result(IEnumerable<Reason> errors)
+    {
+        _result = new Result(errors);
+        Value = default;
+    }
 
     public Result<TR> Match<TR>(Func<T, TR> onSuccess, Func<IEnumerable<Reason>, TR> onFailure) =>
-        IsSuccess ? onSuccess(Value) : onFailure(Reasons);
+        _result.IsSuccess ? onSuccess(Value) : onFailure(_result.Reasons);
 
     public T Map<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
-        IsSuccess ? onSuccess() : onFailure(Reasons);
+        _result.IsSuccess ? onSuccess() : onFailure(_result.Reasons);
 
     public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
-        IsSuccess ? onSuccess() : onFailure(Reasons);
+        _result.IsSuccess ? onSuccess() : onFailure(_result.Reasons);
 
     public Result<T> WithReason(Reason reason) => this with { Reasons = Reasons.Append(reason) };
 
     public Result<T> WithReasons(IEnumerable<Reason> errors) =>
-        this with { Reasons = Reasons.Concat(errors) };
+        this with { Reasons = _result.Reasons.Concat(errors) };
     
     public Result<T> WithError(Error error) => WithReason(error);
     public Result<T> WithErrors(IEnumerable<Error> errors) => WithReasons(errors);
