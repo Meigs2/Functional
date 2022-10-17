@@ -74,6 +74,7 @@ public record Result : ResultBase
     
     public static Result FromReason(Reason reason) => new Result().WithReason(reason);
     public static Result FromReasons(IEnumerable<Reason> errors) => new Result().WithReasons(errors); 
+    public static Result FromException(Exception exception) => exception;
        
     public Result WithError(Error error) => WithReason(error);
     public Result WithErrors(IEnumerable<Error> errors) => WithReasons(errors);
@@ -83,6 +84,7 @@ public record Result : ResultBase
     
     public Result WithInfo(Info info) => WithReason(info);
     public Result WithInfos(IEnumerable<Info> infos) => WithReasons(infos);
+    public Result WithException(Exception exception) => this with { Reasons = Reasons.Append(Error.New(exception)) };
 
     public static implicit operator Result(Reason reason) => Failure(reason);
     public static implicit operator Result(Error error) => Failure(error);
@@ -126,6 +128,8 @@ public record Result<T> : ResultBase
     
     public Result<T> WithInfo(Info info) => WithReason(info);
     public Result<T> WithInfo(IEnumerable<Info> info) => WithReasons(info);
+    
+    public Result<T> WithException(Exception exception) => this with { Reasons = Reasons.Append(Error.New(exception)) };
 
     public static Result<T> Success(T? value) => new(value);
     
@@ -137,6 +141,7 @@ public record Result<T> : ResultBase
     
     public static Result<T> FromReason(Reason reason) => new(reason);
     public static Result<T> FromReason(IEnumerable<Reason> errors) => new(errors);
+    public static Result FromException(Exception exception) => exception;
     
     public static implicit operator Result<T>(T value) => Success(value);
     public static implicit operator Result<T>(Reason error) => Failure(error);
