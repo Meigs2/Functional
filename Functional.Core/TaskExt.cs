@@ -188,8 +188,8 @@ namespace Functional.Core
                  outerKeySelector(t), innerKeySelector(u))));
       }
       
-      public static async Task<T> ToTask<T>(this T @this)
-         => await Task.FromResult(@this);
+      public static Task<T> ToTask<T>(this T @this)
+         => Task.FromResult(@this);
       
       //public static async Task<T> Cast<T>(this Task source)
       //{

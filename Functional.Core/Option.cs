@@ -22,7 +22,7 @@ namespace Functional.Core
         public static Some<TValue> From<TValue>(TValue value) => new(value);
         internal T Value { get; }
 
-        private Some(T value)
+        public Some(T value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value),
@@ -50,7 +50,7 @@ namespace Functional.Core
 
         public static Option<T> Some(T value) => Option.Some(value);
 
-        private Option(Some<T?> some)
+        public Option(Some<T?> some)
         {
             if (some.Value == null)
                 throw new ArgumentNullException(nameof(some),
