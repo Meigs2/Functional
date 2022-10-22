@@ -15,7 +15,7 @@ public static partial class F
 public record struct Result
 {
     private bool? _isSuccess = null;
-    public bool IsSuccess => _isSuccess ??= Errors.Any(reason => !reason.IsExpected);
+    public bool IsSuccess => _isSuccess ??= !Errors.Any() || Errors.Any(e => !e.IsExpected);
     public bool IsFailure => !IsSuccess;
     public IEnumerable<Reason> Reasons { get; internal init; } = Enumerable.Empty<Reason>();
     
