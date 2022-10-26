@@ -38,7 +38,7 @@ namespace Functional.Core
       public static Func<T1, Func<T2, T3, T4, T5, T6, T7, T8, T9, R>> CurryFirst<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>
          (this Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> @this) => t1 => (t2, t3, t4, t5, t6, t7, t8, t9) => @this(t1, t2, t3, t4, t5, t6, t7, t8, t9);
 
-      public static Func<T, T> Tap<T>(Action<T> act) 
+      public static Func<T, T> Then<T>(Action<T> act) 
          => x => { act(x); return x; };
       
       public static R Pipe<T, R>(this T @this, Func<T, R> func) => func(@this);
@@ -47,7 +47,7 @@ namespace Functional.Core
       /// Pipes the input value in the given Action, i.e. invokes the given Action on the given value.
       /// returning the input value. Not really a genuine implementation of pipe, since it combines pipe with Tap.
       /// </summary>
-      public static T Pipe<T>(this T input, Action<T> func) => Tap(func)(input);
+      public static T Pipe<T>(this T input, Action<T> func) => Then(func)(input);
 
       // DATA STRUCTURES
 

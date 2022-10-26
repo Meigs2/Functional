@@ -37,7 +37,7 @@ namespace Functional.Core
         public static Option<T> Some<T>(T value) => Core.Some<T>.From(value);
     }
 
-    public record struct Option<T>
+    public readonly record struct Option<T>
     {
         private readonly bool _isSome;
         private readonly T _value = default!;
@@ -79,7 +79,14 @@ namespace Functional.Core
         }
 
         public bool Equals(Nothing _) => IsNone;
+
         public override string ToString() => _isSome ? $"Some({_value})" : "None";
+
+        /// <inheritdoc />
+        public Option<T> Return(Option<T> value)
+        {
+            return default;
+        }
     }
 
     public static class OptionExt
@@ -115,7 +122,7 @@ namespace Functional.Core
             Apply(@this.Map(F.CurryFirst), arg);
 
         public static Option<R> Bind<T, R>(this Option<T> optT, Func<T, Option<R>> f) =>
-            optT.Match(() => F.Nothing, t => f(t));
+            optT.Match(() => F.Nothing, f);
 
         public static IEnumerable<R> Bind<T, R>(this Option<T?> @this, Func<T, IEnumerable<R>> func) =>
             @this.AsEnumerable().Bind(func);

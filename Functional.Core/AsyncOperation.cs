@@ -44,17 +44,17 @@ public class AsyncOperation<T>
         return new AsyncOperation<TResult>(_task.ContinueWith(t => predicate(t.Result) ? success(t.Result).Result : failure(t.Result).Result));
     }
 
-    public AsyncOperation<T> Tap(Action<T> action)
+    public AsyncOperation<T> Then(Action<T> action)
     {
         return new AsyncOperation<T>(_task.ContinueWith(t => { action(t.Result); return t.Result; }));
     }
     
-    public AsyncOperation<T> TapAsync(Func<T, Task> action)
+    public AsyncOperation<T> ThenAsync(Func<T, Task> action)
     {
         return new AsyncOperation<T>(_task.ContinueWith(t => { action(t.Result).Wait(); return t.Result; }));
     }
     
-    public AsyncOperation<TResult> TapParallel<TResult>(Func<T, IEnumerable<AsyncOperation<TResult>>> selector)
+    public AsyncOperation<TResult> ThenParallel<TResult>(Func<T, IEnumerable<AsyncOperation<TResult>>> selector)
     {
         return new AsyncOperation<TResult>(_task.ContinueWith(t =>
         {

@@ -129,7 +129,7 @@ public abstract record Error : Reason
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Error(Exception e) => New(e);
-
+    
     /// <summary>
     /// Attempt to recover an error from an object.
     /// Will accept Error, ErrorException, Exception, string, Option<Error>
@@ -164,8 +164,8 @@ public abstract record Error : Reason
     public Unit Throw() => throw ToException();
 }
 
-// We actually want to be able to model results as a list of messages, which can contain not only errors, but also warnings, info, etc.
-// Define a base class which ErrorBase can inherit from which allows us to additionally create other base classes for info and warnings.
+public record UnspecifiedError() : UnexpectedError("", 0, Option<Error>.None);
+
 public abstract record Reason
 {
     protected Reason() { }
@@ -174,9 +174,6 @@ public abstract record Reason
     internal abstract bool IsError { get; }
     internal abstract bool IsExpected { get; }
 
-    /// <summary>
-    /// Error code
-    /// </summary>
     public abstract int Code { get; }
 
     public virtual bool Equals(Reason? other)
@@ -196,7 +193,7 @@ public enum ReasonType
     Info
 }
 
-public abstract record Warning : Reason
+public record Warning : Reason
 {
     public sealed override string Message { get; }
     public sealed override int Code { get; }
@@ -210,19 +207,15 @@ public abstract record Warning : Reason
         Code = code;
     }
 
-    public static Warning New(string message) => new WarningReason(message);
+    public static Warning New(string message, int code = 0) => new(message, code);
     public static implicit operator Warning(string message) => New(message);
 }
 
-public record WarningReason : Warning
-{
-    public WarningReason(string message, int code = 0) : base(message, code) { }
-}
-
-public abstract record Info : Reason
+public record Info : Reason
 {
     public sealed override string Message { get; }
     public sealed override int Code { get; }
+
     public sealed override ReasonType Type => ReasonType.Info;
     internal sealed override bool IsError => false;
     internal sealed override bool IsExpected => true;
@@ -233,12 +226,7 @@ public abstract record Info : Reason
         Code = code;
     }
 
-    public static Info New(string message, int code = 0) => new InformationReason(message, code);
+    public static Info New(string message, int code = 0) => new Info(message, code);
     
     public static implicit operator Info(string message) => New(message);
-}
-
-internal record InformationReason : Info
-{
-    public InformationReason(string message, int code = 0) : base(message, code) { }
 }

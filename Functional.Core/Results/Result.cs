@@ -18,17 +18,24 @@ public record struct Result
     public bool IsSuccess => _isSuccess ??= !Errors.Any() || Errors.Any(e => !e.IsExpected);
     public bool IsFailure => !IsSuccess;
     public IEnumerable<Reason> Reasons { get; internal init; } = Enumerable.Empty<Reason>();
-    
     private List<Error>? _errors = null;
-    public IEnumerable<Error> Errors => _errors ??= Reasons.Where(x => x.Type == ReasonType.Error).Cast<Error>().ToList();
-    
+
+    public IEnumerable<Error> Errors =>
+        _errors ??= Reasons.Where(x => x.Type == ReasonType.Error).Cast<Error>().ToList();
+
     private List<Warning>? _warnings = null;
-    public IEnumerable<Warning> Warnings => _warnings ??= Reasons.Where(x => x.Type == ReasonType.Warning).Cast<Warning>().ToList();
-    
+
+    public IEnumerable<Warning> Warnings =>
+        _warnings ??= Reasons.Where(x => x.Type == ReasonType.Warning).Cast<Warning>().ToList();
+
     private List<Info>? _info = null;
-    public IEnumerable<Info> Infos => _info ??= Reasons.Where(x => x.Type == ReasonType.Info).Cast<Info>().ToList();
-    
-    public Result() { }
+
+    public IEnumerable<Info> Information =>
+        _info ??= Reasons.Where(x => x.Type == ReasonType.Info).Cast<Info>().ToList();
+
+    public Result()
+    {
+    }
 
     public Result(Reason reason)
     {
@@ -39,11 +46,17 @@ public record struct Result
     {
         Reasons = errors;
     }
-    
+
     public Result Match(Action onSuccess, Action<IEnumerable<Reason>> onFailure)
     {
-        if (IsSuccess) { onSuccess(); }
-        else { onFailure(Reasons); }
+        if (IsSuccess)
+        {
+            onSuccess();
+        }
+        else
+        {
+            onFailure(Reasons);
+        }
 
         return this;
     }
@@ -52,61 +65,54 @@ public record struct Result
         IsSuccess ? onSuccess() : onFailure(Reasons);
 
     public static Result Success => new();
-    
     public static Result Failure(Reason reason) => new(reason);
     public static Result Failure(string message) => Error.New(message);
     public static Result Failure(IEnumerable<Reason> errors) => new(errors);
-    public static Result Failure() => Failure("The result failed without a specified reason.");
-    
+    public static Result Failure() => Failure(new UnspecifiedError());
     public static Result<T> Failure<T>(Reason reason) => new(reason);
-    public static Result<T> Failure<T>(string reason) => Result<T>.Failure(reason);
     public static Result<T> Failure<T>(IEnumerable<Reason> errors) => new(errors);
-
-    public Result WithReason(Reason reason) => this with { Reasons = Reasons.Prepend(reason) };
+    public static Result<T> Failure<T>(Exception reason) => Error.New(reason);
+    public Result WithReasons(Reason reason) => this with { Reasons = Reasons.Prepend(reason) };
     public Result WithReasons(IEnumerable<Reason> errors) => this with { Reasons = errors.Concat(Reasons) };
-    
-    public static Result FromReason(Reason reason) => new Result().WithReason(reason);
-    public static Result FromReasons(IEnumerable<Reason> errors) => new Result().WithReasons(errors); 
+    public static Result FromReason(Reason reason) => new(reason);
+    public static Result FromReasons(IEnumerable<Reason> reasons) => new(reasons);
     public static Result FromException(Exception exception) => exception;
-       
-    public Result WithError(Error error) => WithReason(error);
+    public Result WithErrors(Error error) => WithReasons(error);
+    public Result WithErrors(params Error[] errors) => WithReasons(errors);
     public Result WithErrors(IEnumerable<Error> errors) => WithReasons(errors);
-    
-    public Result WithWarning(Warning warning) => WithReason(warning);
+    public Result WithWarnings(Warning warning) => WithReasons(warning);
+    public Result WithWarnings(params Warning[] warnings) => WithReasons(warnings);
     public Result WithWarnings(IEnumerable<Warning> warnings) => WithReasons(warnings);
+    public Result WithInformation(Info info) => WithReasons(info);
+    public Result WithInformation(params Info[] info) => WithReasons(info);
+    public Result WithInformation(IEnumerable<Info> information) => WithReasons(information);
     
-    public Result WithInfo(Info info) => WithReason(info);
-    public Result WithInfos(IEnumerable<Info> infos) => WithReasons(infos);
-
     public static implicit operator Result(Reason reason) => Failure(reason);
     public static implicit operator Result(Error error) => Failure(error);
     public static implicit operator Result(Exception exception) => Error.New(exception);
+    public static implicit operator Task<Result>(Result result) => Task.FromResult(result);
     
-    public static Result operator +(Result a, Result b) =>
-        a with { Reasons = a.Reasons.Concat(b.Reasons) };
-
+    public static Result operator +(Result a, Result b) => a with { Reasons = a.Reasons.Concat(b.Reasons) };
     public static Result operator +(Result a, Reason b) => a with { Reasons = a.Reasons.Prepend(b) };
-
-    public static Result operator +(Result a, IEnumerable<Reason> b) =>
-        a with { Reasons = a.Reasons.Concat(b) };
+    public static Result operator +(Reason a, Result b) => b + a;
+    public static Result operator +(Result a, IEnumerable<Reason> b) => a with { Reasons = a.Reasons.Concat(b) };
+    public static Result operator +(IEnumerable<Reason> a, Result b) => b + a;
 }
 
 public record struct Result<T>
 {
     public bool IsSuccess => _result.IsSuccess;
     public bool IsFailure => !IsSuccess;
+
     public IEnumerable<Reason> Reasons
     {
         get => _result.Reasons;
-        internal init => _result = _result with{ Reasons = value };
+        internal init => _result = _result with { Reasons = value };
     }
 
     public IEnumerable<Error> Errors => _result.Errors;
-
     public IEnumerable<Warning> Warnings => _result.Warnings;
-
-    public IEnumerable<Info> Infos => _result.Infos;
-    
+    public IEnumerable<Info> Information => _result.Information;
     public T? Value { get; }
     private Result _result;
 
@@ -118,14 +124,14 @@ public record struct Result<T>
 
     public Result(Reason reason)
     {
-        _result = new Result(reason);
         Value = default;
+        _result = new Result(reason);
     }
 
     public Result(IEnumerable<Reason> errors)
     {
-        _result = new Result(errors);
         Value = default;
+        _result = new Result(errors);
     }
 
     public Result<TR> Match<TR>(Func<T, TR> onSuccess, Func<IEnumerable<Reason>, TR> onFailure) =>
@@ -137,74 +143,165 @@ public record struct Result<T>
     public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<Reason>, T> onFailure) =>
         _result.IsSuccess ? onSuccess() : onFailure(_result.Reasons);
 
-    public Result<T> WithReason(Reason reason) => this with { Reasons = Reasons.Append(reason) };
-
-    public Result<T> WithReasons(IEnumerable<Reason> errors) =>
-        this with { Reasons = Reasons.Concat(errors) };
+    public Result<T> WithReasons(Reason reason) => this with { Reasons = Reasons.Prepend(reason) };
+    public Result<T> WithReasons(IEnumerable<Reason> errors) => this with { Reasons = errors.Concat(Reasons) };
     
-    public Result<T> WithError(Error error) => WithReason(error);
+    public Result<T> WithErrors(Error error) => WithReasons(error);
+    public Result<T> WithErrors(params Error[] errors) => WithReasons(errors);
     public Result<T> WithErrors(IEnumerable<Error> errors) => WithReasons(errors);
-    
-    public Result<T> WithWarning(Warning warning) => WithReason(warning);
+    public Result<T> WithWarnings(Warning warning) => WithReasons(warning);
+    public Result<T> WithWarnings(params Warning[] warnings) => WithReasons(warnings);
     public Result<T> WithWarnings(IEnumerable<Warning> warnings) => WithReasons(warnings);
+    public Result<T> WithInformation(Info info) => WithReasons(info);
+    public Result<T> WithInformation(params Info[] information) => WithReasons(information);
+    public Result<T> WithInformation(IEnumerable<Info> info) => WithReasons(info);
     
-    public Result<T> WithInfo(Info info) => WithReason(info);
-    public Result<T> WithInfo(IEnumerable<Info> info) => WithReasons(info);
-    
-    public Result<T> WithException(Exception exception) => this with { Reasons = Reasons.Append(Error.New(exception)) };
-
     public static Result<T> Success(T? value) => new(value);
     
-    public static Result<T> Failure(Reason reason) => new(reason);
-    public static Result<T> Failure(IEnumerable<Reason> errors) => new(errors);
-    public static Result<T> Failure(string message) => Error.New(message);
-    public static Result<T> Failure(Exception reason) => Error.New(reason);
-    
-    
-    public static Result<T> FromReason(Reason reason) => new(reason);
-    public static Result<T> FromReason(IEnumerable<Reason> errors) => new(errors);
-    public static Result FromException(Exception exception) => exception;
-    
     public static implicit operator Result<T>(T value) => Success(value);
-    public static implicit operator Result<T>(Reason error) => Failure(error);
-    public static implicit operator Result<T>(Error error) => Failure(error);
+    public static implicit operator Result<T>(Error reason) => new(reason);
     public static implicit operator Result<T>(Exception exception) => Error.New(exception);
-    public static implicit operator Option<T>(Result<T?>? @this) => @this?.ToOption() ?? Option.None;
-    public static implicit operator Result<T>(Result result) => result.IsSuccess ? Success(default).WithReasons(result.Reasons) : Failure(result.Reasons);
+
+    public static implicit operator Result<T>(Result result) => result.IsSuccess
+        ? new Result<T>().WithReasons(result.Reasons)
+        : new Result<T>(result.Reasons);
+
     public static implicit operator Task<Result<T>>(Result<T> result) => Task.FromResult(result);
 
     public static implicit operator Result(Result<T> result) =>
         result.IsSuccess ? Result.Success : Result.Failure(result.Reasons);
 
-    public static Result operator +(Result<T> a, Result<T> b) =>
-        a with { Reasons = a.Reasons.Concat(b.Reasons) };
+    public static Result<T> operator +(Result<T> a, Result<T> b) => a.WithReasons(b.Reasons);
+    public static Result<T> operator +(Result<T> a, Result b) => a.WithReasons(b.Reasons);
+    public static Result<T> operator +(Result<T> a, Reason b) => a.WithReasons(b);
+    public static Result operator +(Result a, Result<T> b) => a.WithReasons(b.Reasons);
+    
+    public static Result<T> operator +(Result<T> a, IEnumerable<Reason> b) => a with { Reasons = a.Reasons.Concat(b) };
+    public static Result<T> operator +(IEnumerable<Reason> a, Result<T> b) => b + a;
+    
+    public static implicit operator Option<T>(Result<T?>? @this) => @this?.ToOption() ?? Option.None;
+}
 
-    public static Result operator +(Result<T> a, Result b) =>
-        a with { Reasons = a.Reasons.Concat(b.Reasons) };
+public record struct Result<T, E> where E : Error
+{
+    public bool IsSuccess => _result.IsSuccess;
+    public bool IsFailure => !IsSuccess;
 
-    public static Result operator +(Result a, Result<T> b) =>
-        a with { Reasons = a.Reasons.Concat(b.Reasons) };
+    public IEnumerable<Reason> Reasons
+    {
+        get => _result.Reasons;
+        internal init => _result = _result with { Reasons = value };
+    }
+
+    public IEnumerable<Warning> Warnings => _result.Warnings;
+    public IEnumerable<Info> Information => _result.Information;
+    public T? Value { get; }
+    public E? Error { get; }
+    private Result _result;
+
+    public Result(T? value)
+    {
+        Value = value;
+        Error = default;
+        _result = new Result();
+    }
+
+    public Result(E? error)
+    {
+        Value = default;
+        Error = error;
+        _result = new Result();
+    }
+
+    public Result(Reason reason)
+    {
+        Value = default;
+        Error = default;
+        _result = new Result(reason);
+    }
+
+    public Result(IEnumerable<Reason> errors)
+    {
+        Value = default;
+        Error = default;
+        _result = new Result(errors);
+    }
+
+    public Result<TR> Match<TR>(Func<T, TR> onSuccess, Func<E, TR> onError, Func<IEnumerable<Reason>, TR> onFailure) =>
+        _result.IsSuccess ? onSuccess(Value) : onError(Error);
+
+    public T Map<T>(Func<T> onSuccess, Func<E, T> onError, Func<IEnumerable<Reason>, T> onFailure) =>
+        _result.IsSuccess ? onSuccess() : onError(Error);
+
+    public Result<T> Bind<T>(Func<T> onSuccess, Func<E, T> onError, Func<IEnumerable<Reason>, T> onFailure) =>
+        _result.IsSuccess ? onSuccess() : onError(Error);
+
+    public Result<T, E> WithReasons(Reason reason) => this with { Reasons = Reasons.Prepend(reason) };
+    public Result<T, E> WithReasons(IEnumerable<Reason> errors) => this with { Reasons = errors.Concat(Reasons) };
+    
+    public Result<T, E> WithError(E error) => WithReasons(error);
+    public Result<T, E> WithWarnings(Warning warning) => WithReasons(warning);
+    public Result<T, E> WithWarnings(params Warning[] warnings) => WithReasons(warnings);
+    public Result<T, E> WithWarnings(IEnumerable<Warning> warnings) => WithReasons(warnings);
+    public Result<T, E> WithInformation(Info info) => WithReasons(info);
+    public Result<T, E> WithInformation(params Info[] information) => WithReasons(information);
+    public Result<T, E> WithInformation(IEnumerable<Info> info) => WithReasons(info);
+    
+    public static Result<T, E> Success(T? value) => new(value);
+    public static Result<T, E> Failure(E? error) => new(error);
+
+    public static implicit operator Result<T, E>(T value) => new(value);
+    public static implicit operator Result<T, E>(E error) => new(error);
+
+    public static implicit operator Result<T, E>(Result result) => new(result.Reasons);
+    public static implicit operator Result<T, E>(Result<T> result) => new(result.Reasons);
+
+    public static implicit operator Result(Result<T, E> result) => new(result.Reasons);
+    public static implicit operator Result<T>(Result<T, E> result) => new(result.Reasons);
+    
+    public static implicit operator Task<Result<T, E>>(Result<T, E> result) => Task.FromResult(result);
+    
+    public static Result<T, E> operator +(Result<T, E> a, Result<T, E> b) => a.WithReasons(b.Reasons);
+    public static Result<T, E> operator +(Result<T, E> a, Result<T> b) => a.WithReasons(b.Reasons);
+    public static Result<T, E> operator +(Result<T, E> a, Result b) => a.WithReasons(b.Reasons);
+    
+    public static Result operator +(Result a, Result<T, E> b) => b + a;
+    public static Result<T> operator +(Result<T> a, Result<T, E> b) => b + a;
+    
+    public static Result<T, E> operator +(Result<T, E> a, Reason b) => a.WithReasons(b);
+    public static Result<T, E> operator +(Reason a, Result<T, E> b) => b + a;
+    
+    public static Result<T, E> operator +(Result<T, E> a, IEnumerable<Reason> b) => a with { Reasons = a.Reasons.Concat(b) };
+    public static Result<T, E> operator +(IEnumerable<Reason> a, Result<T, E> b) => b + a;
 }
 
 public static class ResultExtensions
 {
     public static Task<Result<T>> AsTask<T>(this Result<T> result) => Task.FromResult(result);
-    public static Result<T> ToResult<T>(this T result) => result;
+    public static Result<T> ToResult<T>(this T value) => value;
 
-    public static Result Tap(this Result @this, Action<Result> action)
+    public static Result Then(this Result @this, Action<Result> action)
     {
         action(@this);
         return @this;
     }
 
-    public static Result<T> Tap<T>(this Result<T> @this, Action<Result<T>> action)
+    public static Result<T> Then<T>(this Result<T> @this, Action<Result<T>> action)
+    {
+        action(@this);
+        return @this;
+    }
+    
+    public static Result<T, E> Then<T, E>(this Result<T, E> @this, Action<Result<T, E>> action)
+        where E : Error
     {
         action(@this);
         return @this;
     }
 
-    public static Option<T> ToOption<T>(this Result<T?> @this) => @this.IsSuccess ? @this.Value ?? Option<T>.None : Option<T>.None;
+    public static Option<T> ToOption<T>(this Result<T?> @this) =>
+        @this.IsSuccess ? @this.Value ?? Option<T>.None : Option<T>.None;
 
     public static Result<T> ToResult<T>(this Option<T> @this) =>
-        @this.Match(() => Result<T>.Failure("Option is none"), Result<T>.Success);
+        @this.Match<Result<T>>(() => Result.Failure("Test"), value => value);
 }

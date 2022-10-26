@@ -3,21 +3,14 @@ using System.Diagnostics.Contracts;
 
 namespace Functional.Core;
 
-public record UnexpectedError : Error
+public record UnexpectedError(string Message, int Code = 0, Option<Error> Inner = default) : Error
 {
-    public UnexpectedError(string Message, int Code = 0, Option<Error> Inner = default)
-    {
-        this.Message = Message;
-        this.Code = Code;
-        this.Inner = Inner;
-    }
-    
-    public override string Message { get; }
+    public override string Message { get; } = Message;
 
-    public override int Code { get; }
-    
-    public override Option<Error> Inner { get; }
-    
+    public override int Code { get; } = Code;
+
+    public override Option<Error> Inner { get; } = Inner;
+
     public override string ToString() => 
         Message;
 
