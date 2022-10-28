@@ -79,7 +79,7 @@ public class AsyncOperations
                                  success: x => x,
                                  failure: x => 0
                           )
-                          .Tap(_ => Console.WriteLine("Finally"))
+                          .Then(_ => Console.WriteLine("Finally"))
                           .GetTask();
         sw.Stop();
         sw.Elapsed.Should().BeGreaterThan(TimeSpan.FromSeconds(3));
@@ -94,7 +94,7 @@ public class AsyncOperations
                           .FromTask()
                           .MapAsync(x => AsyncDelayedAdd(x, 1, TimeSpan.FromSeconds(1)))
                           .Map(x => x + 5)
-                          .Tap(_ => Console.WriteLine("Finally"))
+                          .Then(_ => Console.WriteLine("Finally"))
                           .GetTask();
         sw.Stop();
         sw.Elapsed.Should().BeGreaterThan(TimeSpan.FromSeconds(2));
