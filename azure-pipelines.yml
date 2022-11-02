@@ -13,28 +13,29 @@ steps:
 - task: NuGetToolInstaller@1
 
 - task: UseDotNet@2
+  displayName: "Use .Net 6"
   inputs:
     packageType: 'sdk'
     version: '6.x'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
-
 - task: DotNetCoreCLI@2
+  displayName: "Restore Solution"
   inputs:
     command: 'restore'
     feedsToUse: 'select'
 
 - task: DotNetCoreCLI@2
+  displayName: "Build"
   inputs:
     command: 'build'
 
 - task: DotNetCoreCLI@2
+  displayName: "Run Tests"
   inputs:
     command: 'test'
 
 - task: DotNetCoreCLI@2
+  displayName: "Pack Assemblies"
   inputs:
     command: 'pack'
     packagesToPack: '**/*.csproj;!**/*.Test*.csproj'
