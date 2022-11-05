@@ -4,6 +4,8 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <Nullable>enable</Nullable>
         <LangVersion>10</LangVersion>
+        <AssemblyName>Meigs2.Functional</AssemblyName>
+        <RootNamespace>Meigs2.Functional</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

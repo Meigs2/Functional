@@ -4,7 +4,8 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>Functional.Tests.Unit</RootNamespace>
+        <RootNamespace>Meigs2.Functional.Tests.Unit</RootNamespace>
+        <AssemblyName>Meigs2.Functional.Tests.Unit</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
