@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
     public static partial class F
     {

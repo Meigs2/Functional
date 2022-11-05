@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
-using Functional.Core;
+using Meigs2.Functional.Enumeration;
 using NUnit.Framework;
 
-namespace Functional.Tests.Unit.FlaggedEnumerations;
+namespace Meigs2.Functional.Tests.Unit.FlaggedEnumerations;
 
 public class FlaggedEnumerationTests
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
    public static partial class F
    {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Functional.Core;
+using Meigs2.Functional;
 
 // ReSharper disable once CheckNamespace
 namespace System

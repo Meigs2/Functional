@@ -8,7 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Common;
 
 /// <summary>
 /// Error value
@@ -315,7 +315,7 @@ public sealed class ManyExceptions : ErrorException
     public readonly IEnumerable<ErrorException> Errors;
 
     public override int Code => 
-        Functional.Core.Errors.ManyErrorsCode;
+        Common.Errors.ManyErrorsCode;
 
     public override string Message =>
         string.Join(", ", Errors.Select(e => e.Message));

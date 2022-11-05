@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Meigs2.Functional.Common;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Results;
 
 public static partial class F
 {

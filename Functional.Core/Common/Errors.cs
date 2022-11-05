@@ -1,7 +1,7 @@
 ﻿
 using System.Linq;
 
-namespace Functional.Core
+namespace Meigs2.Functional.Common
 {
     public static class Errors
     {
@@ -27,7 +27,7 @@ namespace Functional.Core
         /// An error that indicates a value from an operation couldn't be evaluated.  This is a hard
         /// fail for systems that depend on expressions to produce results. 
         /// </summary>
-        public static readonly Error Bottom = Core.Bottom.Default;
+        public static readonly Error Bottom = Common.Bottom.Default;
 
         /// <summary>
         /// Cancelled error text

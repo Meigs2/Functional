@@ -1,7 +1,6 @@
 ﻿using System;
-using static Functional.Core.F;
 
-namespace Functional.Core
+namespace Meigs2.Functional.BuiltInTypes
 {
    public static class Decimal
    {
@@ -9,7 +8,7 @@ namespace Functional.Core
       {
          decimal result;
          return decimal.TryParse(s, out result)
-            ? Some(result) : F.Nothing;
+            ? F.Some(result) : F.Nothing;
       }
 
       public static bool IsOdd(decimal i) => i % 2 == 1;

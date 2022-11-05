@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using Functional.Core.Enumeration;
+using Meigs2.Functional.Enumeration;
 
-namespace Functional.Core;
+namespace Meigs2.Functional;
 
 public static class Value
 {

@@ -1,7 +1,6 @@
 using System.Diagnostics.Contracts;
-using System.Runtime.Serialization;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Common;
 
 /// <summary>
 /// Contains the following:

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Enumeration;
 
 public abstract record FlaggedEnumeration<TObject, TValue> : FlaggedEnumerationBase<TObject, TValue>
     where TObject : FlaggedEnumeration<TObject, TValue> where TValue : IEquatable<TValue>, IComparable<TValue>

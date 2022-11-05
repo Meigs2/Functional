@@ -1,14 +1,12 @@
-﻿namespace Functional.Core
+﻿namespace Meigs2.Functional.BuiltInTypes
 {
-   using static F;
-
    public static class Long
    {
       public static Option<long> Parse(string s)
       {
          long result;
          return long.TryParse(s, out result)
-            ? Some(result) : F.Nothing;
+            ? F.Some(result) : F.Nothing;
       }
    }
 }

@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
-   using static F;
-
    public static partial class F
    {
       public static Task<T> Async<T>(T t) => Task.FromResult(t);
@@ -150,8 +148,8 @@ namespace Functional.Core
          (this Task task, Func<Unit, Task<R>> bind, Func<Unit, R, RR> project)
       {
          await task;
-         R r = await bind(Unit());
-         return project(Unit(), r);
+         R r = await bind(F.Unit());
+         return project(F.Unit(), r);
       }
 
       public static async Task<R> Select<T, R>(this Task<T> task, Func<T, R> f)

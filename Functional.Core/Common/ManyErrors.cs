@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Common;
 
 /// <summary>
 /// `ManyErrors` allows for zero or more errors to be collected.  This is useful for applicative behaviours
@@ -20,7 +19,7 @@ public sealed record ManyErrors(IEnumerable<Error> Errors) : Error
     public IEnumerable<Error> Errors { get; init; } = Errors;
 
     public override int Code => 
-        Functional.Core.Errors.ManyErrorsCode;
+        Common.Errors.ManyErrorsCode;
 
     public override string Message { get; } =
         string.Join(", ", Errors.Select(e => e.Message));
@@ -74,7 +73,7 @@ public sealed record ManyErrors(IEnumerable<Error> Errors) : Error
     [Pure]
     public override Error Head() =>
         Errors.Any()
-            ? Functional.Core.Errors.None
+            ? Common.Errors.None
             : Errors.Head().Value;
 
     /// <summary>
@@ -83,7 +82,7 @@ public sealed record ManyErrors(IEnumerable<Error> Errors) : Error
     [Pure]
     public override Error Tail() =>
         Errors.Skip(1).Any()
-            ? Functional.Core.Errors.None
+            ? Common.Errors.None
             : this with {Errors = Errors.Skip(1)};
 
     /// <summary>

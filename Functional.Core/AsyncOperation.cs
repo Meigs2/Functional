@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Functional.Core;
+namespace Meigs2.Functional;
 
 public class AsyncOperation<T>
 {

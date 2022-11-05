@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Functional.Core.Enumeration;
+namespace Meigs2.Functional.Enumeration;
 
 /// <summary>
 /// A base type to use for creating value objects.
@@ -20,7 +20,7 @@ public record Enumeration<TObject, TValue> : ValueObject<TValue> where TObject :
     /// <summary>
     /// Gets the name.
     /// </summary>
-    /// <value>A <see cref="String"/> that is the name of the <see cref="Enumeration{TObject,TValue}"/>.</value>
+    /// <value>A <see cref="BuiltInTypes.String"/> that is the name of the <see cref="Enumeration{TObject,TValue}"/>.</value>
     public string Name => _name;
 
     protected readonly string _name;

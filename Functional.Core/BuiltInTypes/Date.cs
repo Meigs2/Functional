@@ -1,15 +1,13 @@
 ﻿using System;
 
-namespace Functional.Core
+namespace Meigs2.Functional.BuiltInTypes
 {
-   using static F;
-
    public static class Date
    {
       public static Option<DateTime> Parse(string s)
       {
          DateTime d;
-         return DateTime.TryParse(s, out d) ? Some(d) : F.Nothing;
+         return DateTime.TryParse(s, out d) ? F.Some(d) : F.Nothing;
       }
    }
 }

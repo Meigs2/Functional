@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
-    using static F;
-
    public static class EnumerableExt
    {
-      public static Func<T, IEnumerable<T>> Return<T>() => t => List(t);
+      public static Func<T, IEnumerable<T>> Return<T>() => t => F.List(t);
 
       public static IEnumerable<T> Append<T>(this IEnumerable<T> source
          , params T[] ts) => source.Concat(ts);
@@ -34,17 +32,17 @@ namespace Functional.Core
 
       public static IEnumerable<R> Map_InTermsOfFold<T, R>
          (this IEnumerable<T> ts, Func<T, R> f)
-          => ts.Aggregate(List<R>()
+          => ts.Aggregate(F.List<R>()
              , (rs, t) => rs.Append(f(t)));
 
       static IEnumerable<T> Where_InTermsOfFold<T>
          (this IEnumerable<T> @this, Func<T, bool> predicate)
-          => @this.Aggregate(List<T>()
+          => @this.Aggregate(F.List<T>()
              , (ts, t) => predicate(t) ? ts.Append(t) : ts);
 
       static IEnumerable<R> Bind_InTermsOfFold<T, R>
          (this IEnumerable<T> ts, Func<T, IEnumerable<R>> f)
-         => ts.Aggregate(List<R>()
+         => ts.Aggregate(F.List<R>()
             , (rs, t) => rs.Concat(f(t)));
 
       public static IEnumerable<R> Map<T, R>
@@ -64,7 +62,7 @@ namespace Functional.Core
          list.Take(1)
              .Match(
                 () => Option.None,
-                (x, _) => Some(x));
+                (x, _) => F.Some(x));
 
       //public static IEnumerable<R> _Map<T, R>
       //   (this IEnumerable<T> list, Func<T, R> func)

@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Functional.Core.Enumeration;
-using static Functional.Core.F;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Common;
 
 /// <summary>
 /// Abstract error value
@@ -38,7 +36,7 @@ public abstract record Error : Reason
     /// <summary>
     /// If this error represents an exceptional error, then this will return that exception, otherwise `None`
     /// </summary>
-    [Pure] public Option<Exception> Exception => IsExceptional ? Some(ToException()) : Option.None;
+    [Pure] public Option<Exception> Exception => IsExceptional ? F.Some(ToException()) : Option.None;
 
     public abstract ErrorException ToErrorException();
 

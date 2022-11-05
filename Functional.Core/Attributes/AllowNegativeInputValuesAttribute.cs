@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Functional.Core
+namespace Meigs2.Functional.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class AllowNegativeInputValuesAttribute : Attribute

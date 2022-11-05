@@ -1,13 +1,11 @@
 ﻿using System;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
-   using static F;
-
-   public static class FuncExt
+    public static class FuncExt
    {
       public static Func<T> ToNullary<T>(this Func<Unit, T> f)
-          => () => f(Unit());
+          => () => f(F.Unit());
 
       public static Func<T1, R> Compose<T1, T2, R>(this Func<T2, R> g, Func<T1, T2> f)
          => x => g(f(x));

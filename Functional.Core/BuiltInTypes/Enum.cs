@@ -1,10 +1,8 @@
-﻿namespace Functional.Core
+﻿namespace Meigs2.Functional.BuiltInTypes
 {
-   using static F;
-   
    public static class Enum
    { 
       public static Option<T> Parse<T>(this string s) where T : struct
-         => System.Enum.TryParse(s, out T t) ? Some(t) : F.Nothing ;
+         => System.Enum.TryParse(s, out T t) ? F.Some(t) : F.Nothing ;
    }
 }

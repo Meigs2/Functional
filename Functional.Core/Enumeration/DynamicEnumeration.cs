@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Functional.Core.Enumeration;
+namespace Meigs2.Functional.Enumeration;
 
 public abstract record DynamicEnumeration<TObject, TValue> : Enumeration<TObject, TValue>
     where TObject : DynamicEnumeration<TObject, TValue> where TValue : IEquatable<TValue>, IComparable<TValue>

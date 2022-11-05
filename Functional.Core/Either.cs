@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
-   using static F;
-
    public static partial class F
    {
       public static Either.Left<L> Left<L>(L l) => new(l);
@@ -70,7 +68,7 @@ namespace Functional.Core
 
          public override string ToString() => $"Right({Value})";
 
-         public Right<RR> Map<L, RR>(Func<R, RR> f) => Right(f(Value));
+         public Right<RR> Map<L, RR>(Func<R, RR> f) => F.Right(f(Value));
          public Either<L, RR> Bind<L, RR>(Func<R, Either<L, RR>> f) => f(Value);
       }
    }
@@ -80,14 +78,14 @@ namespace Functional.Core
       public static Either<L, RR> Map<L, R, RR>
          (this Either<L, R> @this, Func<R, RR> f)
          => @this.Match<Either<L, RR>>(
-            l => Left(l),
-            r => Right(f(r)));
+            l => F.Left(l),
+            r => F.Right(f(r)));
 
       public static Either<LL, RR> Map<L, LL, R, RR>
          (this Either<L, R> @this, Func<L, LL> left, Func<R, RR> right)
          => @this.Match<Either<LL, RR>>(
-            l => Left(left(l)),
-            r => Right(right(r)));
+            l => F.Left(left(l)),
+            r => F.Right(right(r)));
 
       public static Either<L, Unit> ForEach<L, R>
          (this Either<L, R> @this, Action<R> act)
@@ -96,7 +94,7 @@ namespace Functional.Core
       public static Either<L, RR> Bind<L, R, RR>
          (this Either<L, R> @this, Func<R, Either<L, RR>> f)
          => @this.Match(
-            l => Left(l),
+            l => F.Left(l),
             r => f(r));
 
 
@@ -105,10 +103,10 @@ namespace Functional.Core
         public static Either<L, RR> Apply<L, R, RR>
            (this Either<L, Func<R, RR>> @this, Either<L, R> arg)
            => @this.Match(
-              Left: errF => Left(errF),
+              Left: errF => F.Left(errF),
               Right: f => arg.Match<Either<L, RR>>(
-                 Left: err => Left(err),
-                 Right: t => Right(f(t))));
+                 Left: err => F.Left(err),
+                 Right: t => F.Right(f(t))));
         
       public static Either<L, Func<T2, R>> Apply<L, T1, T2, R>
          (this Either<L, Func<T1, T2, R>> @this, Either<L, T1> arg)
@@ -150,10 +148,10 @@ namespace Functional.Core
       public static Either<L, RR> SelectMany<L, T, R, RR>(this Either<L, T> @this
          , Func<T, Either<L, R>> bind, Func<T, R, RR> project)
          => @this.Match(
-            Left: l => Left(l),
+            Left: l => F.Left(l),
             Right: t => 
                bind(@this.Right).Match<Either<L, RR>>(
-                  Left: l => Left(l),
+                  Left: l => F.Left(l),
                   Right: r => project(t, r)));
    }
 }

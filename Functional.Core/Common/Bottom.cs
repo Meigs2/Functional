@@ -1,9 +1,8 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Runtime.Serialization;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Common;
 
 /// <summary>
 /// Bottom error

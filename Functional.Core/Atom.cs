@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
    public sealed class Atom<T>
       where T : class

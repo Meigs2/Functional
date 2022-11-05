@@ -1,8 +1,7 @@
-﻿using Functional.Core;
-using Functional.Core.Enumeration;
+﻿using Meigs2.Functional.Enumeration;
 using NUnit.Framework;
 
-namespace Functional.Tests.Unit.Enumerations;
+namespace Meigs2.Functional.Tests.Unit.Enumerations;
 
 public class DynamicEnumerationTests
 {

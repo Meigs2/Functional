@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Functional.Core.Enumeration;
+using Meigs2.Functional.Attributes;
 
-namespace Functional.Core
+namespace Meigs2.Functional.Enumeration
 {
     public abstract record FlaggedEnumerationBase<TObject, TValue> : 
         Enumeration<TObject, TValue>

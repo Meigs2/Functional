@@ -1,9 +1,8 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Runtime.Serialization;
 
-namespace Functional.Core;
+namespace Meigs2.Functional.Common;
 
 /// <summary>
 /// This contains an `Exception` is the classic sense.  This also returns `true` when `IsExceptional` is 

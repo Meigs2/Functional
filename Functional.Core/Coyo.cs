@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
    public class Coyo<V, T>
    {

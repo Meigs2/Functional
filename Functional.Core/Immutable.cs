@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Functional.Core
+namespace Meigs2.Functional
 {
    public static class Immutable
    {

@@ -1,7 +1,4 @@
-using System;
-using System.Diagnostics.Contracts;
-
-namespace Functional.Core;
+namespace Meigs2.Functional.Common;
 
 public record UnexpectedError(string Message, int Code = 0, Option<Error> Inner = default) : Error
 {

@@ -1,9 +1,8 @@
 using System.Diagnostics;
 using FluentAssertions;
-using Functional.Core;
 using NUnit.Framework;
 
-namespace Functional.Tests.Unit.AsyncOperations;
+namespace Meigs2.Functional.Tests.Unit.AsyncOperations;
 
 public class AsyncOperations
 {

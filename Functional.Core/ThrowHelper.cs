@@ -1,7 +1,7 @@
 ﻿using System;
-using Functional.Core.Enumeration;
+using Meigs2.Functional.Enumeration;
 
-namespace Functional.Core;
+namespace Meigs2.Functional;
 
 static class ThrowHelper
 {
