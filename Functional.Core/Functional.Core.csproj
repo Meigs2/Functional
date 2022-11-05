@@ -10,7 +10,7 @@
         <Description>A small library of functional extensions and classes for C#/VB. Amalgamation of LaYumba.Functional, LanguageExt and FunctionalExtensions.</Description>
         <Copyright>Copyright (c) Connor Radeloff 2022</Copyright>
         <PackageProjectUrl>https://github.com/Meigs2/Migratic/</PackageProjectUrl>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
         <RepositoryUrl>https://github.com/Meigs2/Migratic</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>functional, csharp, functional-programming, dotnet, monad</PackageTags>
@@ -19,15 +19,8 @@
     <ItemGroup>
       <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     </ItemGroup>
-
+    
     <ItemGroup>
-      <None Remove="Common\README.md" />
+        <None Include="../LICENSE.md" Pack="true" PackagePath="" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="..\LICENSE.md">
-        <Link>LICENSE.md</Link>
-      </Content>
-    </ItemGroup>
-
 </Project>
