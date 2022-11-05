@@ -6,6 +6,14 @@
         <LangVersion>10</LangVersion>
         <AssemblyName>Meigs2.Functional</AssemblyName>
         <RootNamespace>Meigs2.Functional</RootNamespace>
+        <Title>Meigs2.Functional</Title>
+        <Description>A small library of functional extensions and classes for C#/VB. Amalgamation of LaYumba.Functional, LanguageExt and FunctionalExtensions.</Description>
+        <Copyright>Copyright (c) Connor Radeloff 2022</Copyright>
+        <PackageProjectUrl>https://github.com/Meigs2/Migratic/</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Meigs2/Migratic/blob/master/LICENSE.md</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Meigs2/Migratic</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>functional, csharp, functional-programming, dotnet, monad</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
