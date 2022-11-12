@@ -22,6 +22,7 @@ public record ValueObject<TValue> : IComparable<ValueObject<TValue>>
     protected readonly TValue _value;
     public ValueObject(TValue value) { _value = value; }
     public static implicit operator ValueObject<TValue>(TValue value) => new(value);
+    public static implicit operator TValue(ValueObject<TValue> value) => value.Value;
     
     public int CompareTo(ValueObject<TValue> other)
     {
