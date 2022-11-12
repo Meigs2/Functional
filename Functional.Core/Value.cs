@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Meigs2.Functional.Enumeration;
 
 namespace Meigs2.Functional;
@@ -9,7 +10,7 @@ public static class Value
         where T : IEquatable<T>, IComparable<T> => new(value);
 }
 
-public record ValueObject<TValue>
+public record ValueObject<TValue> : IComparable<ValueObject<TValue>>
     where TValue : IEquatable<TValue>, IComparable<TValue>
 {
     /// <summary>
@@ -21,27 +22,10 @@ public record ValueObject<TValue>
     protected readonly TValue _value;
     public ValueObject(TValue value) { _value = value; }
     public static implicit operator ValueObject<TValue>(TValue value) => new(value);
-
-    public int CompareTo(ValueObject<TValue>? other)
+    
+    public int CompareTo(ValueObject<TValue> other)
     {
-        if (ReferenceEquals(this, other)) return 0;
-        if (ReferenceEquals(null, other)) return 1;
-        return _value.CompareTo(other._value);
-    }
-}
-
-public record ValueObject<TValueObject, TValue> : ValueObject<TValue>, IComparable<TValueObject>
-    where TValueObject : ValueObject<TValueObject, TValue>, IEquatable<TValueObject>
-    where TValue : IEquatable<TValue>, IComparable<TValue>
-{
-    public ValueObject(TValue value) : base(value) { }
-    public static implicit operator ValueObject<TValueObject, TValue>(TValue value) => new(value);
-    public static implicit operator ValueObject<TValueObject, TValue>(TValueObject value) => new(value.Value);
-
-    public int CompareTo(TValueObject? other)
-    {
-        if (ReferenceEquals(this, other)) return 0;
-        if (ReferenceEquals(null, other)) return 1;
+        // The comparison applies to the inner value
         return _value.CompareTo(other._value);
     }
 }
