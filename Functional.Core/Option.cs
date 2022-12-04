@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Meigs2.Functional.Common;
 using Meigs2.Functional.Results;
+using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Meigs2.Functional
 {
@@ -19,7 +22,7 @@ namespace Meigs2.Functional
         internal static readonly Nothing Default = new();
     }
 
-    public struct Some<T>
+    public record Some<T>
     {
         public static Some<TValue> From<TValue>(TValue value) => new(value);
         internal T Value { get; }
@@ -39,14 +42,17 @@ namespace Meigs2.Functional
         public static Option<T> Some<T>(T value) => Functional.Some<T>.From(value);
     }
 
-    public readonly record struct Option<T>
+    public record Option<T>
     {
-        private readonly bool _isSome;
-        private readonly T _value = default!;
-        public bool IsNone => !_isSome;
-        public bool IsSome => _isSome;
+        [JsonInclude]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool IsSome { get; private init; }
+        
+        public bool IsNone => !IsSome;
 
-        public T Value => _value;
+        [JsonInclude]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public T? Value { get; private init; }
 
         public static Option<T> None => Option.None;
 
@@ -57,13 +63,13 @@ namespace Meigs2.Functional
             if (some.Value == null)
                 throw new ArgumentNullException(nameof(some),
                     "Value cannot be null.");
-            _value = some.Value;
-            _isSome = true;
+            IsSome = true;
+            Value = some.Value;
         }
 
         public Option()
         {
-            _isSome = false;
+            IsSome = false;
         }
 
         public static implicit operator Option<T>(Nothing _) => new();
@@ -73,22 +79,16 @@ namespace Meigs2.Functional
         public static implicit operator Option<T>(T value) =>
             value == null ? Nothing.Default : Option.Some(value);
 
-        public R Match<R>(Func<R> None, Func<T, R> Some) => _isSome ? Some(_value!) : None();
+        public R Match<R>(Func<R> None, Func<T, R> Some) => IsSome ? Some(Value!) : None();
 
         public IEnumerable<T?> AsEnumerable()
         {
-            if (_isSome) yield return _value;
+            if (IsSome) yield return Value;
         }
 
         public bool Equals(Nothing _) => IsNone;
 
-        public override string ToString() => _isSome ? $"Some({_value})" : "None";
-
-        /// <inheritdoc />
-        public Option<T> Return(Option<T> value)
-        {
-            return default;
-        }
+        public override string ToString() => IsSome ? $"Some({Value})" : "None";
     }
 
     public static class OptionExt
