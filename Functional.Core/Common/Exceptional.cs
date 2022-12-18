@@ -53,7 +53,7 @@ public record Exceptional : Error
         this.Code = Code;
     }
 
-    public override string Message { get; }
+    public virtual string Message { get; }
 
     public virtual int Code { get; }
 

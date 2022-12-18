@@ -36,28 +36,16 @@ public record ExpectedError : Error
     /// 
     /// > This allows for localised error messages where the message is ignored when matching/catching
     /// </summary>
-    /// <param name="Message">Error message</param>
-    /// <param name="Code">Error code</param>
-    /// <param name="Inner">Optional inner error</param>
-    public ExpectedError(string Message, int Code = 0, Option<Error> Inner = default)
+    /// <param name="message">Error message</param>
+    /// <param name="code">Error code</param>
+    /// <param name="inner">Optional inner error</param>
+    public ExpectedError(string message, int code = 0, Option<Error> inner = default)
     {
-        this.Message = Message;
-        this.Code = Code;
-        this.Inner = Inner;
+        this.Message = message;
+        this.Code = code;
+        this.Inner = inner;
     }
 
-    /// <summary>
-    /// Error message
-    /// </summary>
-    [Pure]
-    public override string Message { get; }
-
-    /// <summary>
-    /// Error code
-    /// </summary>
-    [Pure]
-    public override int Code { get; }
-    
     /// <summary>
     /// Inner error
     /// </summary>

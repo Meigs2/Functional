@@ -10,11 +10,10 @@ namespace Meigs2.Functional.Common;
 /// <summary>
 /// Abstract error value
 /// </summary>
-public abstract record Error : Reason
+public abstract record Error
 {
-    public sealed override ReasonType Type => ReasonType.Error;
-    public override int Code => 0;
-    internal sealed override bool IsError => true;
+    public virtual int Code { get; init; } = 0;
+    public virtual string Message { get; init; } = string.Empty;
     public virtual Option<Error> Inner => Option<Error>.None;
 
     public abstract bool Is<E>()
@@ -27,7 +26,7 @@ public abstract record Error : Reason
         Code == 0 ? Message == baseError.Message : Code == baseError.Code;
 
     public abstract bool IsExceptional { get; }
-    internal override bool IsExpected => false;
+    internal virtual bool IsExpected => false;
     public virtual Error Head() => this;
     public virtual Error Tail() => Errors.None;
     public virtual bool IsEmpty => false;
@@ -163,68 +162,3 @@ public abstract record Error : Reason
 }
 
 public record UnspecifiedError() : UnexpectedError("", 0, Option<Error>.None);
-
-public abstract record Reason
-{
-    protected Reason() { }
-    public abstract ReasonType Type { get; }
-    public abstract string Message { get; }
-    internal abstract bool IsError { get; }
-    internal abstract bool IsExpected { get; }
-
-    public abstract int Code { get; }
-
-    public virtual bool Equals(Reason? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Type == other.Type && Message == other.Message && Code == other.Code;
-    }
-
-    public override int GetHashCode() { return HashCode.Combine(Type, Message, Code); }
-}
-
-public enum ReasonType
-{
-    Error,
-    Warning,
-    Info
-}
-
-public record Warning : Reason
-{
-    public sealed override string Message { get; }
-    public sealed override int Code { get; }
-    public sealed override ReasonType Type => ReasonType.Warning;
-    internal sealed override bool IsError => false;
-    internal sealed override bool IsExpected => true;
-
-    protected Warning(string message, int code = 0)
-    {
-        Message = message;
-        Code = code;
-    }
-
-    public static Warning New(string message, int code = 0) => new(message, code);
-    public static implicit operator Warning(string message) => New(message);
-}
-
-public record Info : Reason
-{
-    public sealed override string Message { get; }
-    public sealed override int Code { get; }
-
-    public sealed override ReasonType Type => ReasonType.Info;
-    internal sealed override bool IsError => false;
-    internal sealed override bool IsExpected => true;
-
-    protected Info(string message, int code = 0)
-    {
-        Message = message;
-        Code = code;
-    }
-
-    public static Info New(string message, int code = 0) => new Info(message, code);
-    
-    public static implicit operator Info(string message) => New(message);
-}

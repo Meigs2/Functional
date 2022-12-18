@@ -21,7 +21,7 @@ public sealed record ManyErrors(IEnumerable<Error> Errors) : Error
     public override int Code => 
         Common.Errors.ManyErrorsCode;
 
-    public override string Message { get; } =
+    public override string Message { get; init; } =
         string.Join(", ", Errors.Select(e => e.Message));
 
     public override string ToString() => 
