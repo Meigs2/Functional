@@ -18,21 +18,17 @@ public record Result
     public bool IsSuccess => _isSuccess ??= !Errors.Any() || Errors.Any(e => !e.IsExpected);
     public bool IsFailure => !IsSuccess;
     public IEnumerable<Error> Errors { get; internal init; } = Enumerable.Empty<Error>();
-
     public Result() { }
     public Result(Error error) { Errors = new[] { error }; }
     public Result(IEnumerable<Error> errors) { Errors = errors; }
 
-    public Result Match(Action onSuccess, Action<IEnumerable<Error>> onFailure)
+    public Result Match(Action success, Action<IEnumerable<Error>> failure)
     {
-        if (IsSuccess) { onSuccess(); }
-        else { onFailure(Errors); }
+        if (IsSuccess) { success(); }
+        else { failure(Errors); }
 
         return this;
     }
-
-    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<Error>, T> onFailure) =>
-        IsSuccess ? onSuccess() : onFailure(Errors);
 
     public static Result Success => new();
     public static Result Failure(Error reason) => new(reason);
@@ -56,16 +52,10 @@ public record Result
     public static Result operator +(Result a, IEnumerable<Error> b) => a with { Errors = a.Errors.Concat(b) };
     public static Result operator +(IEnumerable<Error> a, Result b) => b + a;
 
-    public virtual bool Equals(Result? other) =>
-        other is not null &&
-        IsSuccess == other.IsSuccess &&
-        IsFailure == other.IsFailure &&
-        Errors.SequenceEqual(other.Errors);
+    public virtual bool Equals(Result? other) => other is not null && IsSuccess == other.IsSuccess &&
+                                                 IsFailure == other.IsFailure && Errors.SequenceEqual(other.Errors);
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(_isSuccess, Errors);
-    }
+    public override int GetHashCode() { return HashCode.Combine(_isSuccess, Errors); }
 }
 
 public record Result<T>
@@ -81,12 +71,8 @@ public record Result<T>
 
     public T? Value { get; }
     private Result _result;
+    private Result() { _result = new Result(); }
 
-    private Result()
-    {
-        _result = new Result();
-    }
-    
     public Result(T? value)
     {
         Value = value;
@@ -105,14 +91,8 @@ public record Result<T>
         _result = new Result(errors);
     }
 
-    public Result<TR> Match<TR>(Func<T, TR> onSuccess, Func<IEnumerable<Error>, TR> onFailure) =>
-        _result.IsSuccess ? onSuccess(Value) : onFailure(_result.Errors);
-
-    public T Map<T>(Func<T> onSuccess, Func<IEnumerable<Error>, T> onFailure) =>
-        _result.IsSuccess ? onSuccess() : onFailure(_result.Errors);
-
-    public Result<T> Bind<T>(Func<T> onSuccess, Func<IEnumerable<Error>, T> onFailure) =>
-        _result.IsSuccess ? onSuccess() : onFailure(_result.Errors);
+    public R Match<R>(Func<T, R> success, Func<R> failure) =>
+        _result.IsSuccess ? success(Value!) : failure();
 
     public Result<T> WithErrors(Error reason) => this with { Errors = Errors.Prepend(reason) };
     public Result<T> WithErrors(IEnumerable<Error> errors) => this with { Errors = errors.Concat(Errors) };
@@ -139,16 +119,10 @@ public record Result<T>
     public static implicit operator Option<T>(Result<T?>? @this) => @this?.ToOption() ?? Option.None;
     public virtual bool Equals(T other) => EqualityComparer<T?>.Default.Equals(Value, other);
 
-    public virtual bool Equals(Result? other) =>
-        other is not null &&
-        IsSuccess == other.IsSuccess &&
-        IsFailure == other.IsFailure &&
-        Errors.SequenceEqual(other.Errors);
+    public virtual bool Equals(Result? other) => other is not null && IsSuccess == other.IsSuccess &&
+                                                 IsFailure == other.IsFailure && Errors.SequenceEqual(other.Errors);
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(_result, Value);
-    }
+    public override int GetHashCode() { return HashCode.Combine(_result, Value); }
 }
 
 public record Result<T, E>
@@ -195,14 +169,8 @@ public record Result<T, E>
         _result = new Result(errors);
     }
 
-    public Result<TR> Match<TR>(Func<T, TR> onSuccess, Func<E, TR> onError, Func<IEnumerable<Error>, TR> onFailure) =>
-        _result.IsSuccess ? onSuccess(Value) : onError(Error);
-
-    public T Map<T>(Func<T> onSuccess, Func<E, T> onError, Func<IEnumerable<Error>, T> onFailure) =>
-        _result.IsSuccess ? onSuccess() : onError(Error);
-
-    public Result<T> Bind<T>(Func<T> onSuccess, Func<E, T> onError, Func<IEnumerable<Error>, T> onFailure) =>
-        _result.IsSuccess ? onSuccess() : onError(Error);
+    public R Match<R>(Func<T, R> success, Func<R> failure) =>
+        _result.IsSuccess ? success(Value!) : failure();
 
     public Result<T, E> WithErrors(Error reason) => this with { Errors = Errors.Prepend(reason) };
     public Result<T, E> WithErrors(IEnumerable<Error> errors) => this with { Errors = errors.Concat(Errors) };
@@ -228,18 +196,11 @@ public record Result<T, E>
 
     public static Result<T, E> operator +(IEnumerable<Error> a, Result<T, E> b) => b + a;
 
-    public virtual bool Equals(Result? other) =>
-        other is not null &&
-        IsSuccess == other.IsSuccess &&
-        IsFailure == other.IsFailure &&
-        Errors.SequenceEqual(other.Errors);
+    public virtual bool Equals(Result? other) => other is not null && IsSuccess == other.IsSuccess &&
+                                                 IsFailure == other.IsFailure && Errors.SequenceEqual(other.Errors);
 
     public virtual bool Equals(T other) => EqualityComparer<T?>.Default.Equals(Value, other);
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(_result, Value, Error);
-    }
+    public override int GetHashCode() { return HashCode.Combine(_result, Value, Error); }
 }
 
 public static class ResultExtensions
@@ -247,6 +208,20 @@ public static class ResultExtensions
     public static Task<Result<T>> AsTask<T>(this Result<T> result) => Task.FromResult(result);
     public static Result<T> ToResult<T>(this T value) => value;
 
+    public static Result<R> Map<T, R>(this Result<T> result, Func<T, R> f) =>
+        result.Match(t => new Result<R>(f(t)), () => new Result<R>(result.Errors));
+
+    public static Result<R> Bind<T, R>(this Result<T> result, Func<T, Result<R>> f) =>
+        result.Match(f, () => new Result<R>(result.Errors));
+    
+    public static Result<R, E> Map<T, R, E>(this Result<T, E> result, Func<T, R> f)
+        where E : Error =>
+        result.Match(t => new Result<R, E>(f(t)), () => new Result<R, E>(result.Errors));
+
+    public static Result<R, E> Bind<T, R, E>(this Result<T, E> result, Func<T, Result<R, E>> f)
+        where E : Error =>
+        result.Match(f, () => new Result<R, E>(result.Errors));
+    
     public static Result Then(this Result @this, Action<Result> action)
     {
         action(@this);
