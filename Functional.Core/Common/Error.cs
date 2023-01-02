@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace Meigs2.Functional.Common;
 
 /// <summary>
-/// Abstract error value
+///     Abstract error value
 /// </summary>
 public abstract record Error
 {
@@ -16,149 +16,234 @@ public abstract record Error
     public virtual string Message { get; init; } = string.Empty;
     public virtual Option<Error> Inner => Option<Error>.None;
 
+    public virtual bool IsExceptional => false;
+    internal virtual bool IsExpected => false;
+    public virtual bool IsEmpty => false;
+
+    /// <summary>
+    ///     If this error represents an exceptional error, then this will return that exception, otherwise `None`
+    /// </summary>
+    [Pure]
+    public Option<Exception> Exception => IsExceptional ? F.Some(ToException()) : Option.None;
+
     public abstract bool Is<E>()
         where E : Exception;
 
     /// <summary>
-    /// Return true if this error contains or *is* the `error` provided
+    ///     Return true if this error contains or *is* the `error` provided
     /// </summary>
-    [Pure] public virtual bool Is(Error baseError) => baseError is ManyErrors errors ? errors.Errors.Any(Is) :
-        Code == 0 ? Message == baseError.Message : Code == baseError.Code;
+    [Pure]
+    public virtual bool Is(Error baseError)
+    {
+        return baseError is ManyErrors errors ? errors.Errors.Any(Is) :
+            Code == 0 ? Message == baseError.Message : Code == baseError.Code;
+    }
 
-    public abstract bool IsExceptional { get; }
-    internal virtual bool IsExpected => false;
-    public virtual Error Head() => this;
-    public virtual Error Tail() => Errors.None;
-    public virtual bool IsEmpty => false;
-    [Pure] public virtual Exception ToException() => ToErrorException();
+    public virtual Error Head()
+    {
+        return this;
+    }
 
-    /// <summary>
-    /// If this error represents an exceptional error, then this will return that exception, otherwise `None`
-    /// </summary>
-    [Pure] public Option<Exception> Exception => IsExceptional ? F.Some(ToException()) : Option.None;
+    public virtual Error Tail()
+    {
+        return Errors.None;
+    }
+
+    [Pure]
+    public virtual Exception ToException()
+    {
+        return ToErrorException();
+    }
 
     public abstract ErrorException ToErrorException();
 
-    public Error Append(Error baseError) => (this, error: baseError) switch
+    public Error Append(Error baseError)
     {
-        (ManyErrors e1, ManyErrors e2) => new ManyErrors(e1.Errors.Concat(e2.Errors)),
-        (ManyErrors e1, var e2) => new ManyErrors(e1.Errors.Append(e2)),
-        (var e1, ManyErrors e2) => new ManyErrors(e1.Cons(e2.Errors)),
-        (var e1, var e2) => new ManyErrors(new[] { e1, e2 })
-    };
+        return (this, error: baseError) switch
+        {
+            (ManyErrors e1, ManyErrors e2) => new ManyErrors(e1.Errors.Concat(e2.Errors)),
+            (ManyErrors e1, var e2) => new ManyErrors(e1.Errors.Append(e2)),
+            (var e1, ManyErrors e2) => new ManyErrors(e1.Cons(e2.Errors)),
+            var (e1, e2) => new ManyErrors(new[] { e1, e2 })
+        };
+    }
 
-    public static Error operator +(Error lhs, Error rhs) => lhs.Append(rhs);
+    public static Error operator +(Error lhs, Error rhs)
+    {
+        return lhs.Append(rhs);
+    }
+
     public virtual IEnumerable<Error> AsEnumerable() { yield return this; }
-    public override string ToString() => Message;
+
+    public override string ToString()
+    {
+        return Message;
+    }
 
     /// <summary>
-    /// Create an `Exceptional` error 
+    ///     Create an `Exceptional` error
     /// </summary>
     /// <param name="thisException">Exception</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(Exception thisException) => new Exceptional(thisException);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error New(Exception thisException)
+    {
+        return new Exceptional(thisException);
+    }
 
     /// <summary>
-    /// Create a `Exceptional` error with an overriden message.  This can be useful for sanitising the display message
-    /// when internally we're carrying the exception. 
+    ///     Create a `Exceptional` error with an overriden message.  This can be useful for sanitising the display message
+    ///     when internally we're carrying the exception.
     /// </summary>
     /// <param name="message">Error message</param>
     /// <param name="thisException">Exception</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(string message, Exception thisException) => new Exceptional(message, thisException);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error New(string message, Exception thisException)
+    {
+        return new Exceptional(message, thisException);
+    }
 
     /// <summary>
-    /// Create an `Unexpected` error 
+    ///     Create an `Unexpected` error
     /// </summary>
     /// <param name="message">Error message</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(string message) => new UnexpectedError(message, 0, Option.None);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error New(string message)
+    {
+        return new UnexpectedError(message, 0, Option.None);
+    }
 
     /// <summary>
-    /// Create an `Unexpected` error 
+    ///     Create an `Unexpected` error
     /// </summary>
     /// <param name="code">Error code</param>
     /// <param name="message">Error message</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(int code, string message) => new UnexpectedError(message, code, Option.None);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error New(int code, string message)
+    {
+        return new UnexpectedError(message, code, Option.None);
+    }
 
     /// <summary>
-    /// Create an `Unexpected` error 
+    ///     Create an `Unexpected` error
     /// </summary>
     /// <param name="code">Error code</param>
     /// <param name="message">Error message</param>
     /// <param name="inner">The inner error to this error</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(int code, string message, Error inner) => new UnexpectedError(message, code, inner);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error New(int code, string message, Error inner)
+    {
+        return new UnexpectedError(message, code, inner);
+    }
 
     /// <summary>
-    /// Create an `Unexpected` error 
+    ///     Create an `Unexpected` error
     /// </summary>
     /// <param name="message">Error message</param>
     /// <param name="inner">The inner error to this error</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(string message, Error inner) => new UnexpectedError(message, 0, inner);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error New(string message, Error inner)
+    {
+        return new UnexpectedError(message, 0, inner);
+    }
 
     /// <summary>
-    /// Create a `ManyErrors` error 
+    ///     Create a `ManyErrors` error
     /// </summary>
     /// <remarks>Collects many errors into a single `Error` type, called `ManyErrors`</remarks>
     /// <param name="code">Error code</param>
     /// <param name="inner">The inner error to this error</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error Many(params Error[] errors) => errors.Length == 0 ? Errors.None :
-        errors.Length == 1 ? errors[0] : new ManyErrors(errors);
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error Many(params Error[] errors)
+    {
+        return errors.Length == 0 ? Errors.None :
+            errors.Length == 1 ? errors[0] : new ManyErrors(errors);
+    }
 
     /// <summary>
-    /// Create a new error 
+    ///     Create a new error
     /// </summary>
     /// <param name="code">Error code</param>
     /// <param name="inner">The inner error to this error</param>
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error Many(IEnumerable<Error> errors) => errors.Any() ? Errors.None :
-        errors.Count() == 1 ? errors.Head().Value : new ManyErrors(errors);
-
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Error(string e) => New(e);
-
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Error((int Code, string Message) e) => New(e.Code, e.Message);
-
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Error(Exception e) => New(e);
-    
-    /// <summary>
-    /// Attempt to recover an error from an object.
-    /// Will accept Error, ErrorException, Exception, string, Option<Error>
-    /// If it fails, Errors.Bottom is returned
-    /// </summary>
-    [Pure] public static Error FromObject(object value) => value switch
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Error Many(IEnumerable<Error> errors)
     {
-        Error err => err,
-        ErrorException ex => ex.ToError(),
-        Exception ex => New(ex),
-        string str => New(str),
-        Option<Error> oerr => oerr.GetOrElse(Errors.Bottom),
-        _ => Errors.Bottom
-    };
+        return errors.Any() ? Errors.None :
+            errors.Count() == 1 ? errors.Head().Value : new ManyErrors(errors);
+    }
 
-    [Pure] internal static Option<FAIL> Convert<FAIL>(object err) => err switch
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator Error(string e)
     {
-        // Messy, but we're doing our best to recover an error rather than return Bottom
-        FAIL fail => fail,
-        Exception e when typeof(FAIL) == typeof(Error) => (FAIL)(object)New(e),
-        Exception e when typeof(FAIL) == typeof(string) => (FAIL)(object)e.Message,
-        Error e when typeof(FAIL) == typeof(Exception) => (FAIL)(object)e.ToException(),
-        Error e when typeof(FAIL) == typeof(string) => (FAIL)(object)e.ToString(),
-        string e when typeof(FAIL) == typeof(Exception) => (FAIL)(object)new Exception(e),
-        string e when typeof(FAIL) == typeof(Error) => (FAIL)(object)New(e),
-        _ => Option.None
-    };
+        return New(e);
+    }
+
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator Error((int Code, string Message) e)
+    {
+        return New(e.Code, e.Message);
+    }
+
+    [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator Error(Exception e)
+    {
+        return New(e);
+    }
 
     /// <summary>
-    /// Throw the error as an exception
+    ///     Attempt to recover an error from an object.
+    ///     Will accept Error, ErrorException, Exception, string, Option
+    ///     <Error>
+    ///         If it fails, Errors.Bottom is returned
     /// </summary>
-    public Unit Throw() => throw ToException();
+    [Pure]
+    public static Error FromObject(object value)
+    {
+        return value switch
+        {
+            Error err => err,
+            ErrorException ex => ex.ToError(),
+            Exception ex => New(ex),
+            string str => New(str),
+            Option<Error> oerr => oerr.GetOrElse(Errors.Bottom),
+            _ => Errors.Bottom
+        };
+    }
+
+    [Pure]
+    internal static Option<FAIL> Convert<FAIL>(object err)
+    {
+        return err switch
+        {
+            // Messy, but we're doing our best to recover an error rather than return Bottom
+            FAIL fail => fail,
+            Exception e when typeof(FAIL) == typeof(Error) => (FAIL)(object)New(e),
+            Exception e when typeof(FAIL) == typeof(string) => (FAIL)(object)e.Message,
+            Error e when typeof(FAIL) == typeof(Exception) => (FAIL)(object)e.ToException(),
+            Error e when typeof(FAIL) == typeof(string) => (FAIL)(object)e.ToString(),
+            string e when typeof(FAIL) == typeof(Exception) => (FAIL)(object)new Exception(e),
+            string e when typeof(FAIL) == typeof(Error) => (FAIL)(object)New(e),
+            _ => Option.None
+        };
+    }
+
+    /// <summary>
+    ///     Throw the error as an exception
+    /// </summary>
+    public Unit Throw()
+    {
+        throw ToException();
+    }
 }
 
 public record UnspecifiedError() : UnexpectedError("", 0, Option<Error>.None);

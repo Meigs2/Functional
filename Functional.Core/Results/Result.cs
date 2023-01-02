@@ -15,7 +15,7 @@ public static partial class F
 public record Result
 {
     private bool? _isSuccess;
-    public bool IsSuccess => _isSuccess ??= !Errors.Any() || Errors.Any(e => !e.IsExpected);
+    public bool IsSuccess => _isSuccess ??= !Errors.Any() || Errors.All(e => e.IsExpected);
     public bool IsFailure => !IsSuccess;
     public IEnumerable<Error> Errors { get; internal init; } = Enumerable.Empty<Error>();
     public Result() { }
@@ -31,11 +31,11 @@ public record Result
     }
 
     public static Result Success => new();
-    public static Result Failure(Error reason) => new(reason);
+    public static Result Failure(Error error) => new(error);
     public static Result Failure(string message) => Error.New(message);
     public static Result Failure(IEnumerable<Error> errors) => new(errors);
     public static Result Failure() => Failure(new UnspecifiedError());
-    public static Result<T> Failure<T>(Error reason) => new(reason);
+    public static Result<T> Failure<T>(Error error) => new(error);
     public static Result<T> Failure<T>(IEnumerable<Error> errors) => new(errors);
     public static Result<T> Failure<T>(Exception reason) => Error.New(reason);
     public Result WithErrors(Error reason) => this with { Errors = Errors.Prepend(reason) };

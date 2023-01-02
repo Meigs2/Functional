@@ -47,18 +47,11 @@ public record Exceptional : Error
     /// gracefully handle that, but all stack-trace information (and the like) will be erased.  It is still considered
     /// an exceptional error however.
     /// </remarks>
-    internal Exceptional(string Message, int Code)
+    internal Exceptional(string message, int code)
     {
-        this.Message = Message;
-        this.Code = Code;
+        Message = message;
+        Code = code;
     }
-
-    public virtual string Message { get; }
-
-    public virtual int Code { get; }
-
-    public override string ToString() => 
-        Message;
 
     /// <summary>
     /// Returns the inner exception as an `Error` (if one exists), `None` otherwise
@@ -108,17 +101,4 @@ public record Exceptional : Error
     [Pure]
     public override bool IsExceptional =>
         true;
-
-    /// <summary>
-    /// True if the error is expected
-    /// </summary>
-    [Pure]
-    internal override bool IsExpected =>
-        false;
-
-    public void Deconstruct(out string Message, out int Code)
-    {
-        Message = this.Message;
-        Code = this.Code;
-    }
 }
