@@ -45,7 +45,7 @@ public record struct Result
     public static Result Failure() => Failure(new UnspecifiedError());
     public static Result<T> Failure<T>(Error error) => new(error);
     public static Result<T> Failure<T>(Exception reason) => Error.New(reason);
-    public Result WithError(Error? reason) => this with { Error = Error?.Append(reason) };
+    public Result WithError(Error reason) => this with { Error = Error is { } ? Error.Prepend(reason) : reason };
     public static Result FromError(Error reason) => new(reason);
     public static Result FromException(Exception exception) => exception;
     public static implicit operator Result(Error error) => Failure(error);
@@ -86,7 +86,7 @@ public record struct Result<T>
     }
 
     public R Match<R>(Func<T, R> success, Func<R> failure) => _result.IsSuccess ? success(Value!) : failure();
-    public Result<T> WithError(Error reason) => this with { Error = Error?.Prepend(reason) };
+    public Result<T> WithError(Error reason) => this with { Error = Error is { } ? Error.Prepend(reason) : reason };
     public static Result<T> Success(T? value) => new(value);
     public static implicit operator Result<T>(T value) => Success(value);
     public static implicit operator Result<T>(Error reason) => new Result<T>().WithError(reason);

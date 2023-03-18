@@ -17,7 +17,7 @@ public class Results
         public void Should_Return_Failure()
         {
             var result = Result.Failure(new Exception("Test"));
-            
+
             // use an assertion scope and FluentAssertions to write the test
             using (new AssertionScope())
             {
@@ -25,6 +25,23 @@ public class Results
                 result.IsFailure.Should().BeTrue();
                 result.Error.Message.Should().Be("Test");
             }
+        }
+    }
+
+    public class Exceptions
+    {
+        [Test]
+        public void Try_Catch_Return_Should_Return_Failure_With_Error()
+        {
+            Result<string> result;
+            try { throw new Exception("Test"); }
+            catch (Exception e) { result = e; }
+
+            // use an assertion scope and FluentAssertions to write the test
+            using var scope = new AssertionScope();
+            result.IsSuccess.Should().BeFalse();
+            result.IsFailure.Should().BeTrue();
+            result.Error.Message.Should().Be("Test");
         }
     }
 }
