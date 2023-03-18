@@ -15,7 +15,6 @@ public abstract record Error
     public virtual int Code { get; init; } = 0;
     public virtual string Message { get; init; } = string.Empty;
     public virtual Option<Error> Inner => Option<Error>.None;
-
     public virtual bool IsExceptional => false;
     internal virtual bool IsExpected => false;
     public virtual bool IsEmpty => false;
@@ -39,21 +38,11 @@ public abstract record Error
             Code == 0 ? Message == baseError.Message : Code == baseError.Code;
     }
 
-    public virtual Error Head()
-    {
-        return this;
-    }
-
-    public virtual Error Tail()
-    {
-        return Errors.None;
-    }
+    public virtual Error Head() { return this; }
+    public virtual Error Tail() { return Errors.None; }
 
     [Pure]
-    public virtual Exception ToException()
-    {
-        return ToErrorException();
-    }
+    public virtual Exception ToException() { return ToErrorException(); }
 
     public abstract ErrorException ToErrorException();
 
@@ -68,17 +57,20 @@ public abstract record Error
         };
     }
 
-    public static Error operator +(Error lhs, Error rhs)
+    public Error Prepend(Error baseError)
     {
-        return lhs.Append(rhs);
+        return (this, error: baseError) switch
+        {
+            (ManyErrors e1, ManyErrors e2) => new ManyErrors(e2.Errors.Concat(e1.Errors)),
+            (ManyErrors e1, var e2) => new ManyErrors(e2.Cons(e1.Errors)),
+            (var e1, ManyErrors e2) => new ManyErrors(e1.Cons(e2.Errors)),
+            var (e1, e2) => new ManyErrors(new[] { e2, e1 })
+        };
     }
 
+    public static Error operator +(Error lhs, Error rhs) { return lhs.Append(rhs); }
     public virtual IEnumerable<Error> AsEnumerable() { yield return this; }
-
-    public override string ToString()
-    {
-        return Message;
-    }
+    public override string ToString() { return Message; }
 
     /// <summary>
     ///     Create an `Exceptional` error
@@ -86,10 +78,7 @@ public abstract record Error
     /// <param name="thisException">Exception</param>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(Exception thisException)
-    {
-        return new Exceptional(thisException);
-    }
+    public static Error New(Exception thisException) { return new Exceptional(thisException); }
 
     /// <summary>
     ///     Create a `Exceptional` error with an overriden message.  This can be useful for sanitising the display message
@@ -99,10 +88,7 @@ public abstract record Error
     /// <param name="thisException">Exception</param>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(string message, Exception thisException)
-    {
-        return new Exceptional(message, thisException);
-    }
+    public static Error New(string message, Exception thisException) { return new Exceptional(message, thisException); }
 
     /// <summary>
     ///     Create an `Unexpected` error
@@ -110,10 +96,7 @@ public abstract record Error
     /// <param name="message">Error message</param>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(string message)
-    {
-        return new UnexpectedError(message, 0, Option.None);
-    }
+    public static Error New(string message) { return new UnexpectedError(message, 0, Option.None); }
 
     /// <summary>
     ///     Create an `Unexpected` error
@@ -122,10 +105,7 @@ public abstract record Error
     /// <param name="message">Error message</param>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(int code, string message)
-    {
-        return new UnexpectedError(message, code, Option.None);
-    }
+    public static Error New(int code, string message) { return new UnexpectedError(message, code, Option.None); }
 
     /// <summary>
     ///     Create an `Unexpected` error
@@ -135,10 +115,7 @@ public abstract record Error
     /// <param name="inner">The inner error to this error</param>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(int code, string message, Error inner)
-    {
-        return new UnexpectedError(message, code, inner);
-    }
+    public static Error New(int code, string message, Error inner) { return new UnexpectedError(message, code, inner); }
 
     /// <summary>
     ///     Create an `Unexpected` error
@@ -147,10 +124,7 @@ public abstract record Error
     /// <param name="inner">The inner error to this error</param>
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Error New(string message, Error inner)
-    {
-        return new UnexpectedError(message, 0, inner);
-    }
+    public static Error New(string message, Error inner) { return new UnexpectedError(message, 0, inner); }
 
     /// <summary>
     ///     Create a `ManyErrors` error
@@ -181,24 +155,15 @@ public abstract record Error
 
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Error(string e)
-    {
-        return New(e);
-    }
+    public static implicit operator Error(string e) { return New(e); }
 
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Error((int Code, string Message) e)
-    {
-        return New(e.Code, e.Message);
-    }
+    public static implicit operator Error((int Code, string Message) e) { return New(e.Code, e.Message); }
 
     [Pure]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Error(Exception e)
-    {
-        return New(e);
-    }
+    public static implicit operator Error(Exception e) { return New(e); }
 
     /// <summary>
     ///     Attempt to recover an error from an object.
@@ -240,10 +205,7 @@ public abstract record Error
     /// <summary>
     ///     Throw the error as an exception
     /// </summary>
-    public Unit Throw()
-    {
-        throw ToException();
-    }
+    public Unit Throw() { throw ToException(); }
 }
 
 public record UnspecifiedError() : UnexpectedError("", 0, Option<Error>.None);

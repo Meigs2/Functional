@@ -23,7 +23,7 @@ public class Results
             {
                 result.IsSuccess.Should().BeFalse();
                 result.IsFailure.Should().BeTrue();
-                result.Errors.First().Message.Should().Be("Test");
+                result.Error.Message.Should().Be("Test");
             }
         }
     }
