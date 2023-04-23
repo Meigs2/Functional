@@ -217,4 +217,23 @@ public static class ResultExtensions
 
     public static Result<T> ToResult<T>(this Option<T> @this) =>
         @this.Match<Result<T>>(() => Result.Failure("Test"), value => value);
+
+    public static Result SuccessOrThrow(this Result @this)
+    {
+        if (@this.Error != null) return @this.IsSuccess ? @this : throw @this.Error.ToException();
+        return @this;
+    }
+    
+    public static Result<T> SuccessOrThrow<T>(this Result<T> @this)
+    {
+        if (@this.Error != null) return @this.IsSuccess ? @this : throw @this.Error.ToException();
+        return @this;
+    }
+    
+    public static Result<T, E> SuccessOrThrow<T, E>(this Result<T, E> @this)
+        where E : Error
+    {
+        if (@this.Error != null) return @this.IsSuccess ? @this : throw @this.Error.ToException();
+        return @this;
+    }
 }
